@@ -8,9 +8,13 @@ const port = 7000;
 const cors = require('cors')
 
 const tokenKey = '1a2b-3c4d-5e6f-7g8h';
-app.use(cors()); //не обязательно
 
-
+const corsOptions ={
+    origin:'http://localhost:3000', 
+    credentials:true,            //access-control-allow-credentials:true
+    optionSuccessStatus:200
+}
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use((req, res, next) => {
     if (req.headers.authorization) {
@@ -37,12 +41,6 @@ app.use((req, res, next) => {
 });
 
 app.post('/api/auth', (req, res) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', "application/json"); //В моем случае я получаю json
-    res.setHeader('Access-Control-Allow-Origin', "*"); //Либо конкретный хост (поддерживается группа в виде массива)
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); //Необходимые типы запросов
-    res.setHeader('Access-Control-Allow-Credentials', true); //Означает, что должен быть получен ответ
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
     for (let user of users) {
         if (
             req.body.login === user.login &&
