@@ -10,7 +10,7 @@ const cors = require('cors')
 const tokenKey = '1a2b-3c4d-5e6f-7g8h';
 
 const corsOptions ={
-    origin:'http://localhost:3000', 
+    origin:'http://localhost:3000',
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 }
@@ -41,6 +41,7 @@ app.use((req, res, next) => {
 });
 
 app.post('/api/auth', (req, res) => {
+  console.log(req.body)
     for (let user of users) {
         if (
             req.body.login === user.login &&
