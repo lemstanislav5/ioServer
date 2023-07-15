@@ -6,8 +6,8 @@ const express = require('express'),
 const host = '127.0.0.1';
 const port = 7000;
 const cors = require('cors')
-
-const tokenKey = '1a2b-3c4d-5e6f-7g8h';
+//const privateKey = process.env.REFRESH_TOKEN_PRIVATE_KEY;
+const privateKey = '1a2b-3c4d-5e6f-7g8h';
 
 const corsOptions ={
     origin:'http://localhost:3000',
@@ -20,7 +20,7 @@ app.use((req, res, next) => {
     if (req.headers.authorization) {
         jwt.verify(
             req.headers.authorization.split(' ')[1],
-            tokenKey,
+            privateKey,
             (err, payload) => {
                 if (err) next();
                 else if (payload) {
@@ -41,16 +41,36 @@ app.use((req, res, next) => {
 });
 
 app.post('/api/auth', (req, res) => {
-  console.log(req.body)
     for (let user of users) {
         if (
             req.body.login === user.login &&
             req.body.password === user.password
         ) {
+            // данные о пользователе
+            let { id, login } = users.find((item) => {
+                if (item.login === req.body.login) return item; 
+            })
+            const payload = {id, login};
+            // const response = {
+            //     "status": "Logged in",
+            //     "token": token,
+            //     "refreshToken": refreshToken,
+            // }
+            const accessToken = jwt.sign(
+                payload,
+                privateKey,
+                { expiresIn: "14m" }
+            );
+            const refreshToken = jwt.sign(
+                payload,
+                privateKey,
+                { expiresIn: "30d" }
+            );
             return res.status(200).json({
-                id: user.id,
-                login: user.login,
-                token: jwt.sign({ id: user.id }, tokenKey),
+                id, 
+                login,
+                token: accessToken,
+                refreshToken: refreshToken,
             });
         }
     }
@@ -59,8 +79,33 @@ app.post('/api/auth', (req, res) => {
         .status(404)
         .json({ message: 'User not found' });
 });
-app.post('/api/refresh', (req, res) => {
+app.get('/api/refresh', (req, res) => {
+    //! if (req.cookies?.jwt)
+    // const refreshToken = req.cookies.jwt;
+    let refreshToken = req.headers.authorization.split(' ')[1];
+    jwt.verify(refreshToken, privateKey, (err, tokenDetails) => {
+        console.log(tokenDetails)
+        if (err) return res.status(200).json({ error: true, message: "Invalid refresh token" });
+        // данные о пользователе
+        const payload = { login: tokenDetails.login, token: accessToken };
+        const accessToken = jwt.sign(
+            payload,
+            privateKey,
+            { expiresIn: "14m" }
+        );
+        const refreshToken = jwt.sign(
+            payload,
+            privateKey,
+            { expiresIn: "30d" }
+        );
 
+        return res.status(200).json({
+            id: tokenDetails.id,
+            login: tokenDetails.login,
+            token: accessToken,
+            refreshToken: refreshToken,
+        });
+    });
 });
 app.get('/', (req, res) => {
   res.sendFile('404.html', {root: __dirname })
