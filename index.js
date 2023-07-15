@@ -59,6 +59,9 @@ app.post('/api/auth', (req, res) => {
         .status(404)
         .json({ message: 'User not found' });
 });
+app.post('/api/refresh', (req, res) => {
+
+});
 app.get('/', (req, res) => {
   res.sendFile('404.html', {root: __dirname })
 });
