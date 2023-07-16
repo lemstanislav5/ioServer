@@ -1,15 +1,18 @@
+require('dotenv').config();
+
 const express = require('express'),
     app = express(),
     jwt = require('jsonwebtoken'),
-    users = require('./users');
+    users = require('./users'),
+    host = '127.0.0.1',
+    port = 7000,
+    cors = require('cors'),
+    cookieParser = require("cookie-parser"),
+    process = require('process'),
+    privateKey = process.env.PRIVATE_KEY;
 
-const host = '127.0.0.1';
-const port = 7000;
-const cors = require('cors');
-let cookieParser = require("cookie-parser");
+const handlers = require('./handlers');
 
-//const privateKey = process.env.REFRESH_TOKEN_PRIVATE_KEY;
-const privateKey = '1a2b-3c4d-5e6f-7g8h';
 const corsOptions ={
     origin:'http://localhost:3000',
     credentials:true,            //access-control-allow-credentials:true
@@ -18,29 +21,7 @@ const corsOptions ={
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use((req, res, next) => {
-    if (req.headers.authorization) {
-        jwt.verify(
-            req.headers.authorization.split(' ')[1],
-            privateKey,
-            (err, payload) => {
-                if (err) next();
-                else if (payload) {
-                    for (let user of users) {
-                        if (user.id === payload.id) {
-                            req.user = user;
-                            next();
-                        }
-                    }
-
-                    if (!req.user) next();
-                }
-            }
-        );
-    }
-
-    next();
-});
+app.use((req, res, next) => handlers.authorization(req, res, next, jwt, privateKey, users));
 
 app.post('/api/auth', (req, res) => {
     for (let user of users) {
@@ -53,11 +34,6 @@ app.post('/api/auth', (req, res) => {
                 if (item.login === req.body.login) return item; 
             })
             const payload = {id, login};
-            // const response = {
-            //     "status": "Logged in",
-            //     "token": token,
-            //     "refreshToken": refreshToken,
-            // }
             const accessToken = jwt.sign(
                 payload,
                 privateKey,
