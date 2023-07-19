@@ -1,6 +1,9 @@
+require('dotenv').config();
+
 const express = require('express'),
     app = express(),
     jwt = require('jsonwebtoken'),
+<<<<<<< HEAD
     users = require('./users');
     http = require('http').Server(app),
     // socket----------------------------------------
@@ -16,17 +19,26 @@ const express = require('express'),
         console.log('connection')
     });
     // socket----------------------------------------
+=======
+    users = require('./users'),
+    host = '127.0.0.1',
+    port = 7000,
+    cors = require('cors'),
+    cookieParser = require("cookie-parser"),
+    process = require('process'),
+    privateKey = process.env.PRIVATE_KEY;
+>>>>>>> dec7287767c127713c8e3b027bb2b8d0fb42b2ca
 
-const host = '127.0.0.1';
-const port = 7000;
-const cors = require('cors');
-let cookieParser = require("cookie-parser");
+const handlers = require('./handlers');
 
+<<<<<<< HEAD
 
 const connector = require('./handlers/socket')
 
 //const SECRET_KEY = process.env.REFRESH_TOKEN_PRIVATE_KEY;
 const SECRET_KEY = '1a2b-3c4d-5e6f-7g8h';
+=======
+>>>>>>> dec7287767c127713c8e3b027bb2b8d0fb42b2ca
 const corsOptions ={
     origin:'http://localhost:3000',
     credentials:true,            //access-control-allow-credentials:true
@@ -35,6 +47,7 @@ const corsOptions ={
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(express.json());
+<<<<<<< HEAD
 app.use((req, res, next) => {
     console.log('req.headers.authorization')
     if (req.headers.authorization) {
@@ -61,6 +74,9 @@ app.use((req, res, next) => {
 
     next();
 });
+=======
+app.use((req, res, next) => handlers.authorization(req, res, next, jwt, privateKey, users));
+>>>>>>> dec7287767c127713c8e3b027bb2b8d0fb42b2ca
 
 app.post('/api/auth', (req, res) => {
     for (let user of users) {
@@ -73,11 +89,6 @@ app.post('/api/auth', (req, res) => {
                 if (item.login === req.body.login) return item; 
             })
             const payload = {id, login};
-            // const response = {
-            //     "status": "Logged in",
-            //     "token": token,
-            //     "refreshToken": refreshToken,
-            // }
             const accessToken = jwt.sign(
                 payload,
                 SECRET_KEY,
