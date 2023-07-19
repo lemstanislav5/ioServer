@@ -2,14 +2,31 @@ const express = require('express'),
     app = express(),
     jwt = require('jsonwebtoken'),
     users = require('./users');
+    http = require('http').Server(app),
+    // socket----------------------------------------
+    { Server } = require("socket.io");
+
+    const io = new Server(4000, { 
+        maxHttpBufferSize: 1e8, 
+        pingTimeout: 60000, 
+        cors: { origin: '*' }, 
+    });
+
+    io.on("connection", (socket) => {
+        console.log('connection')
+    });
+    // socket----------------------------------------
 
 const host = '127.0.0.1';
 const port = 7000;
 const cors = require('cors');
 let cookieParser = require("cookie-parser");
 
-//const privateKey = process.env.REFRESH_TOKEN_PRIVATE_KEY;
-const privateKey = '1a2b-3c4d-5e6f-7g8h';
+
+const connector = require('./handlers/socket')
+
+//const SECRET_KEY = process.env.REFRESH_TOKEN_PRIVATE_KEY;
+const SECRET_KEY = '1a2b-3c4d-5e6f-7g8h';
 const corsOptions ={
     origin:'http://localhost:3000',
     credentials:true,            //access-control-allow-credentials:true
@@ -19,13 +36,16 @@ app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use((req, res, next) => {
+    console.log('req.headers.authorization')
     if (req.headers.authorization) {
         jwt.verify(
             req.headers.authorization.split(' ')[1],
-            privateKey,
+            SECRET_KEY,
             (err, payload) => {
-                if (err) next();
-                else if (payload) {
+                if (err) {
+                    req.auth = false;
+                    next()
+                } else if (payload) {
                     for (let user of users) {
                         if (user.id === payload.id) {
                             req.user = user;
@@ -60,12 +80,12 @@ app.post('/api/auth', (req, res) => {
             // }
             const accessToken = jwt.sign(
                 payload,
-                privateKey,
+                SECRET_KEY,
                 { expiresIn: "14m" }
             );
             const refreshToken = jwt.sign(
                 payload,
-                privateKey,
+                SECRET_KEY,
                 { expiresIn: "30d" }
             );
             const cookieOptions = {
@@ -90,19 +110,19 @@ app.get('/api/refresh', (req, res) => {
     console.log(req.cookies)
     // const refreshToken = req.cookies.jwt;
     let refreshToken = req.headers.authorization.split(' ')[1];
-    jwt.verify(refreshToken, privateKey, (err, tokenDetails) => {
+    jwt.verify(refreshToken, SECRET_KEY, (err, tokenDetails) => {
         console.log(tokenDetails)
         if (err) return res.status(400).json({ error: true, message: "Invalid refresh token" });
         // данные о пользователе
         const payload = { id: tokenDetails.id, login: tokenDetails.login };
         const accessToken = jwt.sign(
             payload,
-            privateKey,
+            SECRET_KEY,
             { expiresIn: "14m" }
         );
         const refreshToken = jwt.sign(
             payload,
-            privateKey,
+            SECRET_KEY,
             { expiresIn: "30d" }
         );
         const cookieOptions = {
