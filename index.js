@@ -34,12 +34,12 @@ const connector = require('./handlers/socket')
 
 //const SECRET_KEY = process.env.REFRESH_TOKEN_PRIVATE_KEY;
 const corsOptions ={
-    origin:'http://localhost:7000',
+    origin:'http://localhost:3000',
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 }
-app.use(cookieParser());
 app.use(cors(corsOptions));
+app.use(cookieParser());
 app.use(express.json());
 app.use((req, res, next) => {
     console.log('req.headers.authorization')
