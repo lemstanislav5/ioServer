@@ -7,23 +7,30 @@ const express = require('express'),
     cors = require('cors'),
     HOST = process.env.HOST,
     PORT = process.env.PORT,
-    SOCKET_PORT = process.env.SOCKET_PORT;
+    SOCKET_PORT = process.env.SOCKET_PORT,
+    InitializationController = require('./controllers/InitializationController');
+    InitializationController.initialization();
 
     http = require('http').Server(app),
     // socket----------------------------------------
     { Server } = require("socket.io"),
-    handlers = require('./handlers'),
-
+    // обработчик для всех запросов http
+    httpHandlers = require('./handlers/httpHandlers'),
+    // обработчик для менеджера
+    socketHandlersForManager = require('./handlers/socketHandlersForManager'),
+    // обработчик для пользователя
+    socketHandlersForUsers = require('./handlers/socketHandlersForUsers'),
     io = new Server(SOCKET_PORT, { 
         maxHttpBufferSize: 1e8, 
         pingTimeout: 60000, 
         cors: { origin: '*' }, 
     });
+    io.use((socket, next) => socketHandlersForManager.authentication(socket, next));
+    io.on("connection", socket => {
+        if (socket.authentication === true) return socketHandlersForManager.connection(socket);
+        else return socketHandlersForUsers.connection(socket)
 
-    
-
-    io.use((socket, next) => handlers.authentication(socket, next));
-    io.on("connection", socket => handlers.connection(socket));
+    });
     // socket----------------------------------------
 
 
@@ -36,10 +43,10 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 // проверка токена при любом  запросе
-app.use((req, res, next) => handlers.authorization(req, res, next));
+app.use((req, res, next) => httpHandlers.authorization(req, res, next));
 // проверка логина и пароля для получения токена
-app.post('/api/auth', (req, res) => handlers.auth(req, res));
-app.get('/api/refresh', (req, res) => handlers.refresh(req, res));
+app.post('/api/auth', (req, res) => httpHandlers.auth(req, res));
+app.get('/api/refresh', (req, res) => httpHandlers.refresh(req, res));
 app.get('/', (req, res) => res.sendFile('404.html', {root: __dirname }));
 
 
