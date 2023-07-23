@@ -14,8 +14,6 @@ const express = require('express'),
     http = require('http').Server(app),
     // socket----------------------------------------
     { Server } = require("socket.io"),
-    // обработчик для всех запросов http
-    httpHandlers = require('./handlers/httpHandlers'),
     // обработчик для менеджера
     socketHandlersForManager = require('./handlers/socketHandlersForManager'),
     // обработчик для пользователя
@@ -45,9 +43,10 @@ app.use(express.json());
 // проверка токена при любом  запросе
 app.use((req, res, next) => httpHandlers.authorization(req, res, next));
 // проверка логина и пароля для получения токена
-app.post('/api/auth', (req, res) => httpHandlers.auth(req, res));
-app.get('/api/refresh', (req, res) => httpHandlers.refresh(req, res));
-app.get('/', (req, res) => res.sendFile('404.html', {root: __dirname }));
+app.use('/', routes);
+// app.post('/api/auth', (req, res) => httpHandlers.auth(req, res));
+// app.get('/api/refresh', (req, res) => httpHandlers.refresh(req, res));
+// app.get('/', (req, res) => res.sendFile('404.html', {root: __dirname }));
 
 
 app.listen(PORT, HOST, () => console.log(`Server listens http://${HOST}:${PORT}`));
