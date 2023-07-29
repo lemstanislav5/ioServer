@@ -25,26 +25,27 @@ module.exports = {
     //! ОСТАНОВИЛСЯ ЗДЕСЬ, ПРОДОЛЖАЕМ С РЕДАКТИРОВАНИЯ СЕРВЕРНОЙ СТОРОНЫ ДЛЯ МЕНЕДЖЕРА
     const currentSocketId = socket.id
     socket.on('newMessage', async (message, callback) => {
-      const { id, text, chatId } = message;
+      console.log('newMessage:', message);
+      // !const { id, text, chatId } = message;
       // Опеределяем дефолтные настроки обратного уведомления  для callback
-      let notification = {add: false, send: false};
+      // !let notification = {add: false, send: false};
       // Устаналиваем chatId текущего пользователя если он не выбран
       // UsersController.setCurrent(chatId);
       // В зависимости от результата поиска добовляем или обновляем socketId
-      UsersController.addOrUpdateUser(socket, chatId);
+      // !UsersController.addOrUpdateUser(socket, chatId);
       /** 
        * Пытаемся добавить сообщение в базу данных, если происходит ошибка отправляем 
        * уведомление пользователю { add: false, send: false}, 
        * если сообщение успешно добавлено обновляем уведомление { add: true, send: false} 
       */
-      try {
-        MessegesController.add(chatId, socket.id, id, text, new Date().getTime(), 'from', read = 0);
-        notification = {...notification, add: true};
-        return callback(false, notification);
-      } catch (err) {
-        console.error(err);
-        return callback(true, notification);
-      }
+      // !try {
+      //   MessegesController.add(chatId, socket.id, id, text, new Date().getTime(), 'from', read = 0);
+      //   notification = {...notification, add: true};
+      //   return callback(false, notification);
+      // } catch (err) {
+      //   console.error(err);
+      //   return callback(true, notification);
+      // }
     });
     socket.on('setNewSocket', (data) => {
       const { chatId } = data;
