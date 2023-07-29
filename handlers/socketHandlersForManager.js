@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken'),
 process = require('process'),
 users = require('../users.json'),
+dataBase = require('../services/dataBaseSqlite3'),
 SECRET_KEY = process.env.PRIVATE_KEY;
 
 module.exports = {
@@ -24,6 +25,16 @@ module.exports = {
     console.log('Менеджер подключился!');
     //! ОСТАНОВИЛСЯ ЗДЕСЬ, ПРОДОЛЖАЕМ С РЕДАКТИРОВАНИЯ СЕРВЕРНОЙ СТОРОНЫ ДЛЯ МЕНЕДЖЕРА
     const currentSocketId = socket.id
+    socket.on('getAllUsers', async (callback) => {
+      dataBase.getAllUsers()
+        .then(res => {
+          console.log(res);
+          callback(res);
+        })
+        .catch(err => {
+          console.log(err);
+        })
+    });
     socket.on('newMessage', async (message, callback) => {
       console.log('newMessage:', message);
       // !const { id, text, chatId } = message;
