@@ -27,13 +27,8 @@ module.exports = {
     const currentSocketId = socket.id
     socket.on('getAllUsers', async (callback) => {
       dataBase.getAllUsers()
-        .then(res => {
-          console.log(res);
-          callback(res);
-        })
-        .catch(err => {
-          console.log(err);
-        })
+        .then(res => callback(res))
+        .catch(err => console.log(err))
     });
     socket.on('newMessage', async (message, callback) => {
       console.log('newMessage:', message);

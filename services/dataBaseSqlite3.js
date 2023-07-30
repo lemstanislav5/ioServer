@@ -1,5 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const query = (file, req, sql, params = []) => {
+    console.log(sql, params)
     return new Promise((resolve, reject) => {
         const db = new sqlite3.Database(file, (err) => {
             if (err) console.error(err.message);
@@ -47,6 +48,7 @@ module.exports = {
     getMesseges: () => (query('data.db3', 'all', 'SELECT * FROM messeges', [])),
     updateCurrentUser: (chatId) => (query('data.db3', 'run', 'UPDATE currentUser SET chatId=?', [chatId])),
     setUserNameAndEmail: (name, email, chatId) => (query('data.db3', 'run', 'UPDATE users SET name=?, email=? WHERE chatId=?', [name, email, chatId])),
-    userOffline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=0 WHERE socketId=?', [socketId])),
+    userOnline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [1, socketId])),
+    userOffline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [0, socketId])),
     findUserBySocketId: (socketId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE socketId = "' + socketId + '"', [])),
 }

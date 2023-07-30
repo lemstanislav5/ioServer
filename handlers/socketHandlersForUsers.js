@@ -10,8 +10,8 @@ const ManagerController = require('../controllers/ManagerController');
 
 module.exports = {
   connection: async (socket) => {
-    console.log('Пользователь подключился!');
     const currentSocketId = socket.id
+    UsersController.online(socket.id);
     socket.on('newMessage', async (message, callback) => {
       const { id, text, chatId } = message;
       // Опеределяем дефолтные настроки обратного уведомления  для callback
