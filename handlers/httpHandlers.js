@@ -2,9 +2,19 @@ const jwt = require('jsonwebtoken'),
 process = require('process'),
 users = require('../users.json'),
 SECRET_KEY = process.env.PRIVATE_KEY;
+const {
+    getManager,
+} = require('../services/dataBaseSqlite3');
+
 
 module.exports = {
   authentication: (req, res, next) => {
+    getManager()
+        .then(res => {
+            console.log(res);
+        })
+        .cach(err => console.log(err));
+
     console.log('req.headers.authorization', SECRET_KEY)
     if (req.headers.authorization) {
       jwt.verify(

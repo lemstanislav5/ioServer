@@ -6,7 +6,6 @@ const {
   getCurrentUser,
   delCurrentUser,
   updateCurrentUser,
-  setUserNameAndEmail,
   userOnline,
   userOffline,
   findUserBySocketId,
@@ -51,10 +50,6 @@ class UsersController {
     const user = await findUser(chatId);
     if (user.length === 0) return false;
     return user[0].socketId;
-  }
-  setNameAndEmail(name, email, chatId){
-    console.log('Вносим сведения об имени и email пользовтаеля!');
-    setUserNameAndEmail(name, email, chatId);
   }
   async online(socketId){
     console.log('Сокет ' + socketId + ' online!');

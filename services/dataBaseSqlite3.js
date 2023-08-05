@@ -1,6 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
 const query = (file, req, sql, params = []) => {
-    console.log(sql, params)
     return new Promise((resolve, reject) => {
         const db = new sqlite3.Database(file, (err) => {
             if (err) console.error(err.message);
@@ -20,25 +19,17 @@ const query = (file, req, sql, params = []) => {
       console.log(err);
     });
 }
-/** users
- * chatId   TEXT                                              | messeges TEXT
- * manager  INTEGER default value 0, 0 - client, 1 - maneger  | chatId TEXT
- * socketId TEXT                                              | socketId TEXT
- * name     TEXT                                              | messageId TEXT
- * email    TEXT                                              | text TEXT
- * phone    TEXT                                              | time INTEGER
- * online   INTEGER default value 0, 0 - offline, 1 - online  | type INTEGER default value 0, 0 - to, 1 - from
- *                                                            | sent INTEGER
- *                                                            | read INTEGER
-*/  
+
 module.exports = {
     databaseInitialization: () => {
         return Promise.all([
-            query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `role` INTEGER, `name` TEXT, `email` TEXT, `phone` TEXT, `online` INTEGER)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `messeges` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT,`socketId` TEXT, `messageId` TEXT, `text` TEXT, `time`  INTEGER, `type` TEXT, `read` INTEGER)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `manager` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT,`socketId` TEXT, `name` TEXT, `password` TEXT)"),
         ])
     },
-    addUser: (chatId, socketId, role=0) => (query('data.db3', 'run', 'INSERT INTO users (chatId, socketId, role) values ("' + chatId + '","' + socketId + '","' + role + '")', [])),
+    //USERS
+    addUser: (chatId, socketId) => (query('data.db3', 'run', 'INSERT INTO users (chatId, socketId) values ("' + chatId + '","' + socketId + '")', [])),
     addMessage: (chatId, socketId, messageId, text, time, type, read) => (query('data.db3', 'run', 'INSERT INTO messeges (chatId, socketId, messageId, text, time, type, read) values ("' +
     chatId + '","' + socketId + '","' + messageId + '","' + text + '","' + time + '","' + type + '","' + read + '")', [])),
     findUser: (chatId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE chatId = "' + chatId + '"', [])),
@@ -47,8 +38,9 @@ module.exports = {
     //! Выбор число непрочитанных сообщений
     getMesseges: () => (query('data.db3', 'all', 'SELECT * FROM messeges', [])),
     updateCurrentUser: (chatId) => (query('data.db3', 'run', 'UPDATE currentUser SET chatId=?', [chatId])),
-    setUserNameAndEmail: (name, email, chatId) => (query('data.db3', 'run', 'UPDATE users SET name=?, email=? WHERE chatId=?', [name, email, chatId])),
     userOnline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [1, socketId])),
     userOffline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [0, socketId])),
     findUserBySocketId: (socketId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE socketId = "' + socketId + '"', [])),
+    //MANAGER
+    getManager:() => (query('data.db3', 'all', 'SELECT * FROM manager', [])),
 }

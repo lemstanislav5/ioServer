@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken'),
 process = require('process'),
-users = require('../users.json'),
 dataBase = require('../services/dataBaseSqlite3'),
 SECRET_KEY = process.env.PRIVATE_KEY;
 
