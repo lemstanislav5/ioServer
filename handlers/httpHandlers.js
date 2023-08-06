@@ -6,10 +6,12 @@ const { getManager } = require('../services/dataBaseSqlite3');
 
 
 module.exports = {
-    authentication: async  (req, res, next) => {
+    initiation: async  (req, res, next) => {
         let result  = await getManager();
         if (result.length === 0) return res.send({initiation: false});
-
+        next();
+    },
+    authentication: (req, res, next) => {
         console.log('req.headers.authorization', SECRET_KEY)
         if (req.headers.authorization) {
             jwt.verify(
