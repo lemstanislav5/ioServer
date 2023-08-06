@@ -2,44 +2,39 @@ const jwt = require('jsonwebtoken'),
 process = require('process'),
 users = require('../users.json'),
 SECRET_KEY = process.env.PRIVATE_KEY;
-const {
-    getManager,
-} = require('../services/dataBaseSqlite3');
+const { getManager } = require('../services/dataBaseSqlite3');
 
 
 module.exports = {
-  authentication: (req, res, next) => {
-    getManager()
-        .then(res => {
-            console.log(res);
-        })
-        .cach(err => console.log(err));
+    authentication: async  (req, res, next) => {
+        // let result  = await getManager();
+        // if (result.length === 0) return res.send('Hello World!');
 
-    console.log('req.headers.authorization', SECRET_KEY)
-    if (req.headers.authorization) {
-      jwt.verify(
-          req.headers.authorization.split(' ')[1],
-          SECRET_KEY,
-          (err, payload) => {
-              if (err) {
-                req.auth = false;
-                next()
-              } else if (payload) {
-                    for (let user of users) {
-                        if (user.id === payload.id) {
-                            req.auth = true;
-                            req.user = user;
-                            next();
+        console.log('req.headers.authorization', SECRET_KEY)
+        if (req.headers.authorization) {
+            jwt.verify(
+                req.headers.authorization.split(' ')[1],
+                SECRET_KEY,
+                (err, payload) => {
+                    if (err) {
+                        req.auth = false;
+                        next()
+                    } else if (payload) {
+                        for (let user of users) {
+                            if (user.id === payload.id) {
+                                req.auth = true;
+                                req.user = user;
+                                next();
+                            }
                         }
+
+                        if (!req.user) next();
                     }
-
-                    if (!req.user) next();
                 }
-            }
-        );
-    }
+            );
+        }
 
-    next();
+        next();
   },
   auth: (req, res) => {
     for (let user of users) {
@@ -81,11 +76,11 @@ module.exports = {
         .json({ message: 'User not found' });
   },
   refresh: (req, res) => {
-    console.log(req.cookies)
+    console.log('req.cookies', req.cookies)
     // const refreshToken = req.cookies.jwt;
     let refreshToken = req.headers.authorization.split(' ')[1];
     jwt.verify(refreshToken, SECRET_KEY, (err, tokenDetails) => {
-        console.log(tokenDetails)
+        console.log('tokenDetails', tokenDetails)
         if (err) return res.status(400).json({ error: true, message: "Invalid refresh token" });
         // данные о пользователе
         const payload = { id: tokenDetails.id, login: tokenDetails.login };
