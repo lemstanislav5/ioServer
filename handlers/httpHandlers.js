@@ -6,13 +6,18 @@ const { getManager } = require('../services/dataBaseSqlite3');
 
 
 module.exports = {
-    initiation: async  (req, res) => {
-        console.log('initiation')
-        let result  = await getManager();
-        if (result.length === 0) return res.send({initiation: false});
-    },
-    authentication: (req, res, next) => {
-        console.log('req.headers.authorization', SECRET_KEY)
+    authentication: async  (req, res, next) => {
+        if (req.headers.authorization  === 'Bearer undefined') {
+            console.log('initiation')
+            let result  = await getManager();
+            if (result.length === 0) {
+                return res.send({initiation: false});
+            } else if (result.length === 1) {
+                return res.send({initiation: true});
+            } else {
+                return res.send({initiation: null});
+            }
+        }
         if (req.headers.authorization) {
             jwt.verify(
                 req.headers.authorization.split(' ')[1],
