@@ -7,17 +7,11 @@ const { getManager } = require('../services/dataBaseSqlite3');
 
 module.exports = {
     authentication: async  (req, res, next) => {
-        if (req.headers.authorization  === 'Bearer undefined') {
-            console.log('initiation')
-            let result  = await getManager();
-            if (result.length === 0) {
-                return res.send({initiation: false});
-            } else if (result.length === 1) {
-                return res.send({initiation: true});
-            } else {
-                return res.send({initiation: null});
-            }
-        }
+        //  Проверка на наличие сущности менеджера
+        let result  = await getManager();
+        if (result.length === 0) return res.send({initiation: false});
+        if (result.length === 1) return res.send({initiation: true});
+        // Проверка соответствия токена
         if (req.headers.authorization) {
             jwt.verify(
                 req.headers.authorization.split(' ')[1],
@@ -51,7 +45,7 @@ module.exports = {
         ) {
             // данные о пользователе
             let { id, login } = users.find((item) => {
-                if (item.login === req.body.login) return item; 
+                if (item.login === req.body.login) return item;
             })
             const payload = {id, login};
             const accessToken = jwt.sign(

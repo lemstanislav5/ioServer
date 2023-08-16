@@ -19,10 +19,10 @@ const express = require('express'),
     socketHandlersForManager = require('./handlers/socketHandlersForManager'),
     // обработчик для пользователя
     socketHandlersForUsers = require('./handlers/socketHandlersForUsers'),
-    io = new Server(SOCKET_PORT, { 
-        maxHttpBufferSize: 1e8, 
-        pingTimeout: 60000, 
-        cors: { origin: '*' }, 
+    io = new Server(SOCKET_PORT, {
+        maxHttpBufferSize: 1e8,
+        pingTimeout: 60000,
+        cors: { origin: '*' },
     });
 
 io.use((socket, next) => socketHandlersForManager.authentication(socket, next));
@@ -35,7 +35,7 @@ io.on("connection", socket => (socket.authentication === true)
 const corsOptions ={
     // хосты с которых разрешены запросы
     origin:['http://localhost:3001', 'http://localhost:3000'],
-    credentials:true,            
+    credentials:true,
     optionSuccessStatus:200
 }
 app.use(cors(corsOptions));
