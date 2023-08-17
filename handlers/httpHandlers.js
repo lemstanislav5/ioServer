@@ -6,6 +6,9 @@ const { getManager } = require('../services/dataBaseSqlite3');
 
 
 module.exports = {
+    registration: () => {
+
+    },
     authentication: async  (req, res, next) => {
         //  Проверка на наличие сущности менеджера
         let result  = await getManager();
