@@ -12,14 +12,16 @@ module.exports = {
     authentication: async  (req, res, next) => {
         //  Проверка на наличие сущности менеджера
         let result  = await getManager();
-        if (result.length === 0) return res.send({initiation: false});
-        if (result.length === 1) return res.send({initiation: true});
+        // if (result.length === 0) return res.send({initiation: false});
+        // if (result.length === 1) return res.send({initiation: true});
         // Проверка соответствия токена
+        console.log(req.headers.authorization)
         if (req.headers.authorization) {
             jwt.verify(
                 req.headers.authorization.split(' ')[1],
                 SECRET_KEY,
                 (err, payload) => {
+                    console.log(err, payload)
                     if (err) {
                         req.auth = false;
                         next()
@@ -39,6 +41,9 @@ module.exports = {
         }
 
         next();
+  },
+  initiation: (req, res) => {
+    console.log(1)
   },
   auth: (req, res) => {
     for (let user of users) {
