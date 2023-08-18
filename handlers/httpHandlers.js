@@ -17,8 +17,11 @@ module.exports = {
         // Проверка соответствия токена
         console.log(req.headers.authorization)
         if (req.headers.authorization) {
+            let getToken = req.headers.authorization.split(' ')[1];
+            console.log(typeof getToken)
+            if (getToken === 'undefined') return next()
             jwt.verify(
-                req.headers.authorization.split(' ')[1],
+                getToken,
                 SECRET_KEY,
                 (err, payload) => {
                     console.log(err, payload)
@@ -39,11 +42,11 @@ module.exports = {
                 }
             );
         }
-
+        console.log(req.auth)
         next();
   },
   initiation: (req, res) => {
-    console.log(1)
+    return res.send({initiation: false});
   },
   auth: (req, res) => {
     for (let user of users) {
