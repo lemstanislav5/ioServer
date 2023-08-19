@@ -12,37 +12,24 @@ module.exports = {
     authentication: async (req, res, next) => {
         //  Проверка на наличие существования менеджера
         let manager  = await getManager();
-        if (manager.length === 0) req.manager = false;
-        if (manager.length === 1) req.manager = true;
+        if (manager.length === 0) req.initiation = false;
+        if (manager.length === 1) req.initiation = true;
         if (req.headers.authorization) {
-            let getToken = req.headers.authorization.split(' ')[1];
-            if (getToken === 'undefined') return next()
-            console.log(getToken)
-            jwt.verify(
-                getToken,
-                SECRET_KEY,
-                (err, payload) => {
-                    if (err) {
-                        console.log('err: ', err);
-                        req.auth = false;
-                    } else if (payload) {
-                        //! ПРОВЕРКА ПО ДАННЫМ ИЗ БАЗЫ
-                        console.log('payload: ', payload);
-                        for (let user of users) {
-                            if (user.id === payload.id) {
-                                req.auth = true;
-                                req.user = user;
-                            }
-                        }
-
+            let token = req.headers.authorization.split(' ')[1];
+            if (token === 'undefined') return next()
+            jwt.verify(token, SECRET_KEY, (err, payload) => {
+                    if (err) console.error('TokenExpiredError: jwt expired');
+                    //? Проверка соответствия идентификатора
+                    if (manager[0] !== undefined && payload !== undefined && manager[0].id === payload.id) {
+                        req.auth = true;
+                        req.manager = payload.login;
                     }
                 }
             );
         }
-        console.log(req.auth)
         next();
   },
-  initiation:  (req, res) => (res.send({manager: req.manager})),
+  initiation:  (req, res) => (res.send({initiation: req.initiation, manager: req.manager})),
   auth: (req, res) => {
     for (let user of users) {
         if (
