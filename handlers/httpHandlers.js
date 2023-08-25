@@ -2,12 +2,15 @@ const jwt = require('jsonwebtoken'),
 process = require('process'),
 users = require('../users.json'),
 SECRET_KEY = process.env.PRIVATE_KEY;
-const { getManager } = require('../services/dataBaseSqlite3');
+const { getManager, addManager } = require('../services/dataBaseSqlite3');
 
 
 module.exports = {
-    registration: () => {
-
+    registration: async (req, res) => {
+      let result  = await addManager(req.body.email, req.body.password);
+      console.log(result);
+      if (req.initiation === true) return res.send({success: false})
+      return res.send({success: true})
     },
     authentication: async (req, res, next) => {
         //  Проверка на наличие существования менеджера
@@ -73,9 +76,10 @@ module.exports = {
     console.log('req.cookies', req.cookies)
     // const refreshToken = req.cookies.jwt;
     let refreshToken = req.headers.authorization.split(' ')[1];
+    if (refreshToken === undefined) return res.status(200).json({ error: true, message: "Invalid refresh token " });
     jwt.verify(refreshToken, SECRET_KEY, (err, tokenDetails) => {
         console.log('tokenDetails', tokenDetails)
-        if (err) return res.status(400).json({ error: true, message: "Invalid refresh token" });
+        if (err) return res.status(400).json({ error: true, message: "Invalid refresh token 2" });
         // данные о пользователе
         const payload = { id: tokenDetails.id, login: tokenDetails.login };
         const accessToken = jwt.sign(
