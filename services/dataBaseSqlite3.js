@@ -29,7 +29,7 @@ module.exports = {
         return Promise.all([
             query('data.db3', 'run', "CREATE TABLE if not exists `clients` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `messeges` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT,`socketId` TEXT, `messageId` TEXT, `text` TEXT, `time`  INTEGER, `type` TEXT, `read` INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `manager` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `socketId` TEXT, `email` TEXT, `password` TEXT)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `manager` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `socketId` TEXT, `login` TEXT, `password` TEXT)"),
         ])
     },
     //clients
@@ -46,6 +46,6 @@ module.exports = {
     userOffline: (socketId) => (query('data.db3', 'run', 'UPDATE clients SET online=? WHERE socketId=?', [0, socketId])),
     findUserBySocketId: (socketId) => (query('data.db3', 'all', 'SELECT * FROM clients WHERE socketId = "' + socketId + '"', [])),
     //MANAGER
-    addManager: (email, password) => (query('data.db3', 'all', 'INSERT INTO manager (email, password) values ("' + email + '","' + email + '")', [])),
+    addManager: (login, password) => (query('data.db3', 'all', 'INSERT INTO manager (login, password) values ("' + login + '","' + password + '")', [])),
     getManager: () => (query('data.db3', 'all', 'SELECT * FROM manager', [])),
 }
