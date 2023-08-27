@@ -26,6 +26,11 @@ module.exports = {
     }
     next();
   },
+  checkAccessToken: (req, res) => {
+    console.log(1)
+    if (req.auth) return res.status(200).send({ access: false });
+    return res.status(200).send({ access: false });
+  },
   registration: async (req, res) => {
     let result = await updateAdmin(req.body.login, req.body.password);
     console.log(result);
