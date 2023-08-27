@@ -1,6 +1,6 @@
 require("dotenv").config();
 // создаем базу данных и добавляем пользователя с паролем и логином - admin
-require("./services/dataBase").init('admin', 'admin')
+require("./services/dataBase").init('1', '1')
 const express = require("express"),
   app = express(),
   cookieParser = require("cookie-parser"),

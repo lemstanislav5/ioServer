@@ -24,8 +24,8 @@ module.exports = {
     console.log('Менеджер подключился!');
     //! ОСТАНОВИЛСЯ ЗДЕСЬ, ПРОДОЛЖАЕМ С РЕДАКТИРОВАНИЯ СЕРВЕРНОЙ СТОРОНЫ ДЛЯ МЕНЕДЖЕРА
     const currentSocketId = socket.id
-    socket.on('getAllUsers', async (callback) => {
-      getAllclients()
+    socket.on('getUsers', async (callback) => {
+      getUsers()
         .then(res => callback(res))
         .catch(err => console.log(err))
     });

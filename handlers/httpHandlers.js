@@ -33,15 +33,11 @@ module.exports = {
     return res.send({ success: true });
   },
   authorization: (req, res) => {
-    console.log(req.admin)
-    console.log(req.body.login, req.admin.login, req.body.password, req.admin.password)
     if (req.body.login === req.admin.login && req.body.password === req.admin.password) {
       // данные о пользователе
       const payload = { id: req.body.id, login: req.body.login };
       const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "14m" });
-      const refreshToken = jwt.sign(payload, SECRET_KEY, {
-        expiresIn: "30d",
-      });
+      const refreshToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "30d" });
       const cookieOptions = {
         httpOnly: true,
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -50,8 +46,8 @@ module.exports = {
       };
       res.cookie("refreshToken", refreshToken, cookieOptions);
       return res.status(200).json({
-        payload,
         token: accessToken,
+        login: req.admin.login,
       });
     }
 
