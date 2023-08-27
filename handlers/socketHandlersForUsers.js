@@ -5,8 +5,6 @@ const { v4: uuidv4 } = require('uuid');
 
 const UsersController = require('../controllers/UserController');
 const MessegesController = require('../controllers/MessegesController');
-const ManagerController = require('../controllers/ManagerController');
-
 
 module.exports = {
   connection: async (socket) => {

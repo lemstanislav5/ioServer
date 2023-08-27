@@ -9,7 +9,7 @@ const {
   userOnline,
   userOffline,
   findUserBySocketId,
-} = require('../services/dataBaseSqlite3');
+} = require('../services/dataBase');
 
 
 

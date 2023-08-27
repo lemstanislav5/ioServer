@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken'),
 process = require('process'),
-{ getAllclients } = require("../services/dataBaseSqlite3");
+{ getAllclients } = require("../services/dataBase");
 SECRET_KEY = process.env.PRIVATE_KEY;
 
 module.exports = {

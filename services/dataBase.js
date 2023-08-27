@@ -25,11 +25,12 @@ const query = (file, req, sql, params = []) => {
 }
 
 module.exports = {
-    databaseInitialization: () => {
+    init: (login, password) => {
         return Promise.all([
             query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `messeges` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT,`socketId` TEXT, `messageId` TEXT, `text` TEXT, `time`  INTEGER, `type` TEXT, `read` INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `administrator` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `socketId` TEXT, `login` TEXT, `password` TEXT)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `admin` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `socketId` TEXT, `login` TEXT, `password` TEXT)"),
+            query('data.db3', 'all', 'INSERT OR REPLACE INTO admin (id, login, password) values ("1", "' + login + '","' + password + '")', []),
         ])
     },
     //users
@@ -45,7 +46,7 @@ module.exports = {
     userOnline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [1, socketId])),
     userOffline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [0, socketId])),
     findUserBySocketId: (socketId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE socketId = "' + socketId + '"', [])),
-    //Administrator
-    addAdministrator: (login, password) => (query('data.db3', 'all', 'INSERT INTO administrator (login, password) values ("' + login + '","' + password + '")', [])),
-    getAdministrator: () => (query('data.db3', 'all', 'SELECT * FROM administrator', [])),
+    //Admin
+    updateAdmin: (login, password) => (query('data.db3', 'run', 'UPDATE admin SET login=? password=?', [login, password])),
+    getAdmin: () => (query('data.db3', 'all', 'SELECT * FROM admin', [])),
 }
