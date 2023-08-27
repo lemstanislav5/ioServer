@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken'),
 process = require('process'),
-dataBase = require('../services/dataBaseSqlite3'),
+{ getAllclients } = require("../services/dataBaseSqlite3");
 SECRET_KEY = process.env.PRIVATE_KEY;
 
 module.exports = {
@@ -25,7 +25,7 @@ module.exports = {
     //! ОСТАНОВИЛСЯ ЗДЕСЬ, ПРОДОЛЖАЕМ С РЕДАКТИРОВАНИЯ СЕРВЕРНОЙ СТОРОНЫ ДЛЯ МЕНЕДЖЕРА
     const currentSocketId = socket.id
     socket.on('getAllUsers', async (callback) => {
-      dataBase.getAllUsers()
+      getAllclients()
         .then(res => callback(res))
         .catch(err => console.log(err))
     });

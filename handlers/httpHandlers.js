@@ -2,33 +2,33 @@ const jwt = require("jsonwebtoken"),
   process = require("process"),
   users = require("../users.json"),
   SECRET_KEY = process.env.PRIVATE_KEY;
-const { getManager, addManager } = require("../services/dataBaseSqlite3");
+const { getAdministrator, addAdministrator } = require("../services/dataBaseSqlite3");
 
 module.exports = {
-  isManagerCreated: async (req, res, next) => {
-    console.log('isManagerCreated')
+  isadministratorCreated: async (req, res, next) => {
+    console.log('isAdministratorCreated')
     //  Проверка на наличие существования менеджера
-    let manager = await getManager();
-    console.log(manager.length);
-    if (manager.length === 1) {
-      req.manager = manager[0];
-    } else if (manager.length === 0) {
-      req.manager = null;
+    let administrator = await getAdministrator();
+    console.log(administrator.length);
+    if (administrator.length === 1) {
+      req.administrator = administrator[0];
+    } else if (administrator.length === 0) {
+      req.administrator = null;
     }
     next();
   },
   authentication: async (req, res, next) => {
     // Если инициализация пройдена и имеется заголовок авторизации
-    if (req.manager && req.headers.authorization) {
+    if (req.administrator && req.headers.authorization) {
       let token = req.headers.authorization.split(" ")[1];
       if (token === "undefined") return next();
       jwt.verify(token, SECRET_KEY, (err, payload) => {
         if (err) console.error("TokenExpiredError: jwt expired");
         //? Проверка соответствия идентификатора
         if (
-          req.manager !== undefined &&
+          req.administrator !== undefined &&
           payload !== undefined &&
-          req.manager.id === payload.id
+          req.administrator.id === payload.id
         ) {
           req.auth = true;
         }
@@ -37,20 +37,20 @@ module.exports = {
     next();
   },
   initiation: (req, res) => {
-    if (req.manager)
-      return res.send({ initiation: true, login: req.manager.login });
+    if (req.administrator)
+      return res.send({ initiation: true, login: req.administrator.login });
     return res.send({ initiation: false });
   },
   registration: async (req, res) => {
-    let result = await addManager(req.body.login, req.body.password);
+    let result = await addadministrator(req.body.login, req.body.password);
     console.log(result);
     if (req.initiation === true) return res.send({ success: false });
     return res.send({ success: true });
   },
   authorization: (req, res) => {
-    console.log(req.manager)
-    console.log(req.body.login, req.manager.login, req.body.password, req.manager.password)
-    if (req.body.login === req.manager.login && req.body.password === req.manager.password) {
+    console.log(req.administrator)
+    console.log(req.body.login, req.administrator.login, req.body.password, req.administrator.password)
+    if (req.body.login === req.administrator.login && req.body.password === req.administrator.password) {
       // данные о пользователе
       const payload = { id: req.body.id, login: req.body.login };
       const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "14m" });
