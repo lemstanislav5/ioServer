@@ -26,7 +26,7 @@ module.exports = {
     }
     next();
   },
-  checkAccessToken: (req, res) => {
+  access: (req, res) => {
     console.log(1)
     if (req.auth) return res.status(200).send({ access: false });
     return res.status(200).send({ access: false });
