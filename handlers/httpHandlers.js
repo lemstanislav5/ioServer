@@ -27,8 +27,7 @@ module.exports = {
     next();
   },
   access: (req, res) => {
-    console.log(1)
-    if (req.auth) return res.status(200).send({ access: false });
+    if (req.auth) return res.status(200).send({ access: true });
     return res.status(200).send({ access: false });
   },
   registration: async (req, res) => {
@@ -59,8 +58,6 @@ module.exports = {
     return res.status(404).json({ message: "User not found" });
   },
   refresh: (req, res) => {
-    console.log("req.cookies", req.cookies);
-    // const refreshToken = req.cookies.jwt;
     let refreshToken = req.headers.authorization.split(" ")[1];
     if (refreshToken === undefined)
       return res
