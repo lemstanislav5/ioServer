@@ -18,31 +18,29 @@ module.exports = {
         if (
           req.admin !== undefined &&
           payload !== undefined &&
-          req.admin.login == payload.login
-        )
+          req.admin.id === payload.id
+        ) {
           req.auth = true;
+        }
       });
     }
     next();
   },
-  access: (req, res) => {
+  messages: (req, res) => {
     console.log(req.access);
     if (req.auth) return res.status(200).send({ access: true });
-    return res.status(200).send({ access: false });
+    return res.status(401).send({ access: false });
   },
   registration: async (req, res) => {
     let result = await updateAdmin(req.body.login, req.body.password);
-    if (req.initiation === true)
-      return res.status(200).send({ success: false });
+    console.log(result);
+    if (req.initiation === true) return res.send({ success: false });
     return res.send({ success: true });
   },
   authorization: (req, res) => {
-    if (
-      req.body.login === req.admin.login &&
-      req.body.password === req.admin.password
-    ) {
+    if (req.body.login === req.admin.login && req.body.password === req.admin.password) {
       // данные о пользователе
-      const payload = { login: req.body.login };
+      const payload = { id: req.body.id, login: req.body.login };
       const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "14m" });
       const refreshToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "30d" });
       const cookieOptions = {
@@ -61,29 +59,31 @@ module.exports = {
     return res.status(404).json({ message: "User not found" });
   },
   refresh: (req, res) => {
+    console.log("req.cookies", req.cookies);
+    // const refreshToken = req.cookies.jwt;
     let refreshToken = req.headers.authorization.split(" ")[1];
     if (refreshToken === undefined)
-      if (err)
-        return res
-          .status(200)
-          .send({ access: false, err: "refreshToken is undefined" });
+      return res
+        .status(200)
+        .json({ error: true, message: "Invalid refresh token " });
     jwt.verify(refreshToken, SECRET_KEY, (err, tokenDetails) => {
+      console.log("tokenDetails", tokenDetails);
       if (err)
         return res
-          .status(200)
-          .send({ access: false, err: "refreshToken not verify" });
+          .status(400)
+          .json({ error: true, message: "Invalid refresh token 2" });
       // данные о пользователе
-      const payload = { login: tokenDetails.login };
+      const payload = { id: tokenDetails.id, login: tokenDetails.login };
       const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "14m" });
       const refreshToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "30d" });
       const cookieOptions = {
         httpOnly: true,
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         secure: true,
-        sameSite: "none", //! ИСПРАВИТЬ
+        sameSite: "none",
       };
       res.cookie("refreshToken", refreshToken, cookieOptions);
-      return res.status(200).send({
+      return res.status(200).json({
         payload,
         token: accessToken,
       });
