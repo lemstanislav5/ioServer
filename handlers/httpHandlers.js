@@ -27,9 +27,9 @@ module.exports = {
     next();
   },
   messages: (req, res) => {
-    console.log(req.access);
-    if (req.auth) return res.status(200).send({ access: true });
-    return res.status(401).send({ access: false });
+    console.log('req.auth', req.auth);
+    if (req.auth) return res.status(200).send({ login: req.admin.login });
+    return res.status(401).send();
   },
   registration: async (req, res) => {
     let result = await updateAdmin(req.body.login, req.body.password);
@@ -40,7 +40,7 @@ module.exports = {
   authorization: (req, res) => {
     if (req.body.login === req.admin.login && req.body.password === req.admin.password) {
       // данные о пользователе
-      const payload = { id: req.body.id, login: req.body.login };
+      const payload = { id: req.admin.id, login: req.admin.login };
       const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "14m" });
       const refreshToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "30d" });
       const cookieOptions = {
@@ -52,7 +52,7 @@ module.exports = {
       res.cookie("refreshToken", refreshToken, cookieOptions);
       return res.status(200).json({
         token: accessToken,
-        login: req.admin.login,
+        login: req.admin.login
       });
     }
 
@@ -67,7 +67,6 @@ module.exports = {
         .status(200)
         .json({ error: true, message: "Invalid refresh token " });
     jwt.verify(refreshToken, SECRET_KEY, (err, tokenDetails) => {
-      console.log("tokenDetails", tokenDetails);
       if (err)
         return res
           .status(400)
