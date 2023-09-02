@@ -64,7 +64,7 @@ module.exports = {
     let refreshToken = req.headers.authorization.split(" ")[1];
     if (refreshToken === undefined)
       return res
-        .status(200)
+        .status(400)
         .json({ error: true, message: "Invalid refresh token " });
     jwt.verify(refreshToken, SECRET_KEY, (err, tokenDetails) => {
       if (err)
