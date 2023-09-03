@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken'),
 process = require('process'),
-{ getAllclients } = require("../services/dataBase");
+{ getUsers } = require("../services/dataBase");
 SECRET_KEY = process.env.PRIVATE_KEY;
 
 module.exports = {
@@ -25,8 +25,12 @@ module.exports = {
     //! ОСТАНОВИЛСЯ ЗДЕСЬ, ПРОДОЛЖАЕМ С РЕДАКТИРОВАНИЯ СЕРВЕРНОЙ СТОРОНЫ ДЛЯ МЕНЕДЖЕРА
     const currentSocketId = socket.id
     socket.on('getUsers', async (callback) => {
+      console.log('getUsers')
       getUsers()
-        .then(res => callback(res))
+        .then(res => {
+          console.log(res)
+          callback(res)
+        })
         .catch(err => console.log(err))
     });
     socket.on('newMessage', async (message, callback) => {
