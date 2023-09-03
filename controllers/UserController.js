@@ -2,9 +2,6 @@ const {
   addUser,
   findUser,
   updateSocketId,
-  setCurrentUser,
-  getCurrentUser,
-  delCurrentUser,
   updateCurrentUser,
   userOnline,
   userOffline,
@@ -26,25 +23,7 @@ class UsersController {
       console.log('Сокет не нуждается в обновлении.');
     }
   }
-  async setCurrent(chatId, required) {
-    const users = await getCurrentUser();
-    if(users.length === 0) {
-      await setCurrentUser(chatId);
-      console.log('Текущим пользователем выбран: ' + chatId);
-    } else if(required === 1) {
-      await updateCurrentUser(chatId);
-      console.log('Текущим пользователем заменен на: ' + chatId);
-    }
-  }
-  async delCurrent() {
-    const chatId = await getCurrentUser().chatId;
-    await delCurrentUser(chatId);
-    console.log('Статус "текущий" у пользователя ' + chatId + ' удален в связи с разъединением связи!');
-  }
-  getCurrent() {
-    console.log('Получаем текущего пользователя');
-    return getCurrentUser();
-  }
+
   async getSocketCurrentUser(chatId) {
     console.log('Получаем socketId текущего пользовтаеля!');
     const user = await findUser(chatId);

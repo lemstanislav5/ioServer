@@ -14,8 +14,6 @@ module.exports = {
       const { id, text, chatId } = message;
       // Опеределяем дефолтные настроки обратного уведомления  для callback
       let notification = {add: false, send: false};
-      // Устаналиваем chatId текущего пользователя если он не выбран
-      UsersController.setCurrent(chatId);
       // В зависимости от результата поиска добовляем или обновляем socketId
       UsersController.addOrUpdateUser(socket, chatId);
       /** 
@@ -34,8 +32,6 @@ module.exports = {
     });
     socket.on('setNewSocket', (data) => {
       const { chatId } = data;
-      // Устаналиваем chatId текущего пользователя если он не выбран
-      UsersController.setCurrent(chatId);
       // В зависимости от результата поиска добовляем или обновляем socketId
       UsersController.addOrUpdateUser(socket, chatId);
     });
@@ -81,7 +77,6 @@ module.exports = {
       })
     });
     socket.on('disconnect', () => {
-      // UsersController.delCurrent();
       UsersController.offline(currentSocketId);
     });
   }

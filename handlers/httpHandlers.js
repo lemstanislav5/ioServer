@@ -27,13 +27,13 @@ module.exports = {
     next();
   },
   messages: (req, res) => {
-    console.log('req.auth', req.auth);
+    //! ДОРАБОТАТЬ
     if (req.auth) return res.status(200).send({ login: req.admin.login });
     return res.status(401).send();
   },
   registration: async (req, res) => {
+     //! ДОРАБОТАТЬ
     let result = await updateAdmin(req.body.login, req.body.password);
-    console.log(result);
     if (req.initiation === true) return res.send({ success: false });
     return res.send({ success: true });
   },
@@ -59,9 +59,7 @@ module.exports = {
     return res.status(404).json({ message: "User not found" });
   },
   refresh: (req, res) => {
-    console.log("req.cookies", req.cookies);
-    // const refreshToken = req.cookies.jwt;
-    let refreshToken = req.headers.authorization.split(" ")[1];
+    const refreshToken = req.cookies.refreshToken;
     if (refreshToken === undefined)
       return res
         .status(400)
