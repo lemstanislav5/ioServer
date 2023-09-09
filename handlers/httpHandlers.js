@@ -59,12 +59,12 @@ module.exports = {
     return res.status(404).json({ message: "User not found" });
   },
   refresh: (req, res) => {
-    const refreshToken = req.cookies.refreshToken;
-    if (refreshToken === undefined)
+    const inputRefreshToken = req.cookies.refreshToken;
+    if (inputRefreshToken === undefined)
       return res
         .status(400)
         .json({ error: true, message: "refresh token is undefined" });
-    jwt.verify(refreshToken, SECRET_KEY, (err, tokenDetails) => {
+    jwt.verify(inputRefreshToken, SECRET_KEY, (err, tokenDetails) => {
       if (err)
         return res
           .status(400)
@@ -80,10 +80,38 @@ module.exports = {
         sameSite: "none",
       };
       res.cookie("refreshToken", refreshToken, cookieOptions);
+      console.log('accessToken администратора обновлен по refreshToken.')
       return res.status(200).json({
         payload,
         token: accessToken,
       });
     });
   },
+  logout: (req, res) => {
+    //! ВОЗМОЖНО ОТРАЖАТЬ В БАЗЕ ВРЕМЯ И ДАТУ ВЫХОДА И ОБНОВЛЯТЬ СТАТУС
+    const inputRefreshToken = req.cookies.refreshToken;
+    if (inputRefreshToken === undefined)
+      return res
+        .status(400)
+        .json({ error: true, message: "refresh token is undefined" });
+    jwt.verify(inputRefreshToken, SECRET_KEY, (err, tokenDetails) => {
+      if (err)
+        return res
+          .status(400)
+          .json({ error: true, message: "refresh token is not verified" });
+      // данные о пользователе
+      const payload = { id: tokenDetails.id, login: tokenDetails.login };
+      const accessToken = undefined;
+      const refreshToken = undefined;
+      const cookieOptions = {
+        httpOnly: true,
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        secure: true,
+        sameSite: "none",
+      };
+      res.cookie("refreshToken", refreshToken, cookieOptions);
+      console.log('logout: пользователь  id: ' + tokenDetails.id + 'login: ' +  tokenDetails.login + ' вышел из сервиса.' )
+      return res.status(200).json({token: accessToken});
+    });
+  }
 };
