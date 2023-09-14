@@ -7,7 +7,7 @@ SECRET_KEY = process.env.PRIVATE_KEY;
 module.exports = {
   authentication: (socket, next) => {
     if (socket.handshake.query && socket.handshake.query.token){
-      jwt.verify(socket.handshake.query.token, SECRET_KEY, function(err, decoded) {
+      jwt.verify(socket.handshake.query.token, SECRET_KEY, (err, decoded) => {
         if (err) return next(new Error('Authentication error'));
         socket.authentication = true;
         socket.decoded = decoded;

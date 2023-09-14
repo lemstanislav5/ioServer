@@ -1,7 +1,7 @@
-const fs = require("fs");
-const util = require('../utilities/utilities');
-const process = require('process');
-const { v4: uuidv4 } = require('uuid');
+const fs = require("fs"),
+      util = require('../utilities/utilities'),
+      process = require('process'),
+      { v4: uuidv4 } = require('uuid');
 
 const UsersController = require('../controllers/UserController');
 const MessegesController = require('../controllers/MessegesController');
