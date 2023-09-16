@@ -49,4 +49,6 @@ module.exports = {
     //Admin
     updateAdmin: (login, password) => (query('data.db3', 'run', 'UPDATE admin SET login=? password=?', [login, password])),
     getAdmin: () => (query('data.db3', 'all', 'SELECT * FROM admin', [])),
+    updateAdmin: (socketId) => (query('data.db3', 'all', 'UPDATE admin SET socketId=? WHERE id=1', [socketId])),
+
 }

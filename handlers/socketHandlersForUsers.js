@@ -1,6 +1,7 @@
 const fs = require("fs"),
       util = require('../utilities/utilities'),
       process = require('process'),
+      { getAdmin } = require("../services/dataBase"), 
       { v4: uuidv4 } = require('uuid');
 
 const UsersController = require('../controllers/UserController');
@@ -11,6 +12,14 @@ module.exports = {
     const currentSocketId = socket.id
     UsersController.online(socket.id);
     socket.on('newMessage', async (message, callback) => {
+      getAdmin()
+        .then(res => {
+          console.log('getAdmin: ', res[0].socketId)
+          if(res[0].length === 0 || res[0].socketId === undefined) return console.log('getAdmin - ОШИБКА!')
+          io.to(res[0].socketId).emit('newMessage', message);
+        })
+        .catch(err => console.log(err))
+      //io.to(socket.id).emit('notification', 'Менеджер offline!');
       const { id, text, chatId } = message;
       // Опеределяем дефолтные настроки обратного уведомления  для callback
       let notification = {add: false, send: false};
