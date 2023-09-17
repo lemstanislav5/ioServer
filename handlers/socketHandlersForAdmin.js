@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken'),
 process = require('process'),
-{ getUsers, updateAdmin } = require("../services/dataBase"), 
+{ getUsers, updateAdmin, getMesseges } = require("../services/dataBase"), 
 users = require("../utilities/users");
 SECRET_KEY = process.env.PRIVATE_KEY;
 
@@ -35,6 +35,16 @@ module.exports = {
       getUsers()
         .then(res => {
           console.table(users(res));
+          callback(res)
+        })
+        .catch(err => console.log(err))
+    });
+    
+    socket.on('getMesseges', async (callback) => {
+      console.log('getMesseges: ')
+      getMesseges()
+        .then(res => {
+          console.log(res)
           callback(res)
         })
         .catch(err => console.log(err))
