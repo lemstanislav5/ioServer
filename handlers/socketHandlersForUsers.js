@@ -1,43 +1,53 @@
 const fs = require("fs"),
       util = require('../utilities/utilities'),
       process = require('process'),
-      { getAdmin } = require("../services/dataBase"), 
+      { getAdmin, addMessage, findMesseges } = require("../services/dataBase"), 
       { v4: uuidv4 } = require('uuid');
 
 const UsersController = require('../controllers/UserController');
-const MessegesController = require('../controllers/MessegesController');
+
 
 module.exports = {
   connection: async (socket) => {
     const currentSocketId = socket.id
     UsersController.online(socket.id);
     socket.on('newMessage', async (message, callback) => {
-      getAdmin()
-        .then(res => {
-          console.log('getAdmin: ', res[0].socketId)
-          if(res[0].length === 0 || res[0].socketId === undefined) return console.log('getAdmin - ОШИБКА!')
-          io.to(res[0].socketId).emit('newMessage', message);
+      const { id, text, chatId } = message;
+      let error, answer;
+      // Выполняется запись сообщения в базу данных!
+      try {
+        await addMessage(chatId, socket.id, id, text, new Date().getTime(), 'from', read = 0);
+        error = false, answer = {add: true, send: false}; 
+      } catch (err) {
+        error = true, answer = {add: false, send: false}; 
+        console.error(err);
+        return callback(error, answer);
+      }
+      try {
+        let recordedMessage = await findMesseges(id);
+        getAdmin()
+        .then(admin => {
+          if(admin[0] === 0 || admin[0].socketId === undefined) return console.log('getAdmin - ОШИБКА!')
+          console.log('getAdmin: ', admin[0].socketId)
+          io.to(admin[0].socketId).emit('newMessage', recordedMessage);
+          // 
         })
         .catch(err => console.log(err))
       //io.to(socket.id).emit('notification', 'Менеджер offline!');
-      const { id, text, chatId } = message;
       // Опеределяем дефолтные настроки обратного уведомления  для callback
-      let notification = {add: false, send: false};
       // В зависимости от результата поиска добовляем или обновляем socketId
       UsersController.addOrUpdateUser(socket, chatId);
+      } catch (err) {
+        console.error(err);
+        return callback(error, answer);
+      }
+      return callback(error, answer);
       /** 
        * Пытаемся добавить сообщение в базу данных, если происходит ошибка отправляем 
        * уведомление пользователю { add: false, send: false}, 
        * если сообщение успешно добавлено обновляем уведомление { add: true, send: false} 
       */
-      try {
-        MessegesController.add(chatId, socket.id, id, text, new Date().getTime(), 'from', read = 0);
-        notification = {...notification, add: true};
-        return callback(false, notification);
-      } catch (err) {
-        console.error(err);
-        return callback(true, notification);
-      }
+
     });
     socket.on('setNewSocket', (data) => {
       const { chatId } = data;

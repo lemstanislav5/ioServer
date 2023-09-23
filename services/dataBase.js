@@ -41,6 +41,7 @@ module.exports = {
     updateSocketId: (chatId, socketId) => (query('data.db3', 'run', 'UPDATE users SET socketId=? WHERE chatId=?', [socketId, chatId])),
     getUsers: () => (query('data.db3', 'all', 'SELECT * FROM users', [])),
     //! Выбор число непрочитанных сообщений
+    findMesseges: (messageId) => (query('data.db3', 'all', 'SELECT * FROM messeges WHERE messageId = "' + messageId + '"', [])),
     getMesseges: () => (query('data.db3', 'all', 'SELECT * FROM messeges', [])),
     updateCurrentUser: (chatId) => (query('data.db3', 'run', 'UPDATE currentUser SET chatId=?', [chatId])),
     userOnline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [1, socketId])),
