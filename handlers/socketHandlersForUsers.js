@@ -29,7 +29,7 @@ module.exports = {
         .then(admin => {
           if(admin[0] === 0 || admin[0].socketId === undefined) return console.log('getAdmin - ОШИБКА!')
           console.log('getAdmin: ', admin[0].socketId)
-          io.to(admin[0].socketId).emit('newMessage', recordedMessage);
+          io.to(admin[0].socketId).emit('newMessage', recordedMessage[0]);
           // 
         })
         .catch(err => console.log(err))
