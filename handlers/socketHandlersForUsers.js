@@ -1,7 +1,7 @@
 const fs = require("fs"),
       util = require('../utilities/utilities'),
       process = require('process'),
-      { getAdmin, addMessage, findMesseges } = require("../services/dataBase"), 
+      { getAdmin, addMessage, findMesseges, userOnline } = require("../services/dataBase"), 
       { v4: uuidv4 } = require('uuid');
 
 const UsersController = require('../controllers/UserController');
@@ -10,7 +10,6 @@ const UsersController = require('../controllers/UserController');
 module.exports = {
   connection: async (socket) => {
     const currentSocketId = socket.id
-    UsersController.online(socket.id);
     socket.on('newMessage', async (message, callback) => {
       const { id, text, chatId } = message;
       let error, answer;
@@ -53,6 +52,7 @@ module.exports = {
       const { chatId } = data;
       // В зависимости от результата поиска добовляем или обновляем socketId
       UsersController.addOrUpdateUser(socket, chatId);
+      UsersController.online(chatId)
     });
     socket.on('introduce', async (message, callback) => {
       const { name, email, chatId } = message;

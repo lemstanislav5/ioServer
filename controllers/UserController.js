@@ -13,6 +13,7 @@ const {
 class UsersController {
   async addOrUpdateUser(socket, chatId) {
     const user = await findUser(chatId);
+    console.log(user)
     if (user.length === 0) {
       await addUser(chatId, socket.id);
       console.log('Пользователь добавлен.');
@@ -30,14 +31,12 @@ class UsersController {
     if (user.length === 0) return false;
     return user[0].socketId;
   }
-  async online(socketId){
-    console.log('Сокет ' + socketId + ' online!');
-    const user = await findUserBySocketId(socketId);
-    userOnline(socketId);
+  online(chatId){
+    console.log('Сокет ' + chatId + ' online!');
+    userOnline(chatId);
   }
   async offline(socketId){
     console.log('Сокет ' + socketId + ' offline!');
-    const user = await findUserBySocketId(socketId);
     userOffline(socketId);
   }
 }
