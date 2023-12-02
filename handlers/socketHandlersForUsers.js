@@ -10,6 +10,15 @@ const UsersController = require('../controllers/UserController');
 module.exports = {
   connection: async (socket) => {
     const currentSocketId = socket.id
+    socket.on('online', async (chatId, callback) => {
+      let resultOfChecking = null, resultAddUser = null, checkSocket = null, resultCheckSocket = null, resultUpdateSocketId = null;
+      resultOfChecking = await UsersController.checkСhatId(socket, chatId);
+      if (!resultOfChecking) resultAddUser = await UsersController.addUser(socket, chatId);
+      resultCheckSocket = await UsersController.checkSocket(socket, chatId);
+      if (!checkSocket) resultUpdateSocketId = await UsersController.updateSocketId(socket, chatId);
+      console.log(JSON.stringify({resultOfChecking, resultAddUser, checkSocket, resultCheckSocket, resultUpdateSocketId}));
+      return callback({resultOfChecking, resultAddUser, checkSocket, resultCheckSocket, resultUpdateSocketId});
+    })
     socket.on('newMessage', async (message, callback) => {
       const { id, text, chatId } = message;
       let error, answer;
@@ -35,7 +44,6 @@ module.exports = {
       //io.to(socket.id).emit('notification', 'Менеджер offline!');
       // Опеределяем дефолтные настроки обратного уведомления  для callback
       // В зависимости от результата поиска добовляем или обновляем socketId
-      UsersController.addOrUpdateUser(socket, chatId);
       } catch (err) {
         console.error(err);
         return callback(error, answer);
@@ -50,8 +58,6 @@ module.exports = {
     });
     socket.on('setNewSocket', (data) => {
       const { chatId } = data;
-      // В зависимости от результата поиска добовляем или обновляем socketId
-      UsersController.addOrUpdateUser(socket, chatId);
       UsersController.online(chatId)
     });
     socket.on('introduce', async (message, callback) => {
