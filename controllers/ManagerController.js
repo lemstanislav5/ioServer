@@ -3,9 +3,16 @@ const {
   addManager,
   findManager,
   getManager,
- } = require('../services/dataBaseSqlite3');
+  getAdmin,
+ } = require('../services/dataBase');
 
 class ManagerController {
+  async getAdmin() {
+    let res = await getAdmin();
+    console.log(__filename, '\n\x1b[33m Получены данные менеджера: \x1b[0m ', res);
+    return res[0];
+  }
+
   async check(id) {
     let res = (await this.find(id))[0];
     if (res === undefined) return false;

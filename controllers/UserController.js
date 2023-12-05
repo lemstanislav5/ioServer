@@ -44,8 +44,10 @@ class UsersController {
     userOnline(chatId);
   }
   async offline(socketId){
-    console.log('Сокет ' + socketId + ' offline!');
+    let user = await findUserBySocketId(socketId);
+    console.log(user)
     userOffline(socketId);
+    return user[0];
   }
 }
 

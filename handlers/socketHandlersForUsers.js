@@ -1,24 +1,36 @@
 const fs = require("fs"),
       util = require('../utilities/utilities'),
       process = require('process'),
-      { getAdmin, addMessage, findMesseges, userOnline } = require("../services/dataBase"), 
+      { addMessage, findMesseges, userOnline } = require("../services/dataBase"), 
       { v4: uuidv4 } = require('uuid');
 
 const UsersController = require('../controllers/UserController');
+const ManagerController = require('../controllers/ManagerController');
 
 
 module.exports = {
   connection: async (socket) => {
     const currentSocketId = socket.id
     socket.on('online', async (chatId, callback) => {
-      let resultOfChecking = null, resultAddUser = null, checkSocket = null, resultCheckSocket = null, resultUpdateSocketId = null;
-      resultOfChecking = await UsersController.checkСhatId(socket, chatId);
-      if (!resultOfChecking) resultAddUser = await UsersController.addUser(socket, chatId);
-      resultCheckSocket = await UsersController.checkSocket(socket, chatId);
-      if (!checkSocket) resultUpdateSocketId = await UsersController.updateSocketId(socket, chatId);
-      console.log(JSON.stringify({resultOfChecking, resultAddUser, checkSocket, resultCheckSocket, resultUpdateSocketId}));
-      return callback({resultOfChecking, resultAddUser, checkSocket, resultCheckSocket, resultUpdateSocketId});
+      //! await ВОЗМОЖНО НЕ НУЖЕН, ВСЕ НУЖНО ОСТАВИТЬ В КОНТРОЛЛЕРАХ
+      let checkСhatId, addUser, checkSocket, updateSocketId;
+      checkСhatId = await UsersController.checkСhatId(socket, chatId);
+      if (!checkСhatId) addUser = await UsersController.addUser(socket, chatId);
+      checkSocket = await UsersController.checkSocket(socket, chatId);
+      if (!checkSocket) updateSocketId = await UsersController.updateSocketId(socket, chatId);
+      console.log(JSON.stringify({checkСhatId, addUser, checkSocket, updateSocketId}));
+      if(checkСhatId || addUser) {
+        await UsersController.online(chatId);
+        let {id, socketId} = await ManagerController.getAdmin();
+        if(id && socketId) io.to(socketId).emit('online', chatId);
+      }
+      return callback({checkСhatId, addUser, checkSocket, updateSocketId});
     })
+
+    socket.on('offline', async (chatId) => {
+      console.log('offline', chatId);
+    })
+
     socket.on('newMessage', async (message, callback) => {
       const { id, text, chatId } = message;
       let error, answer;
@@ -33,14 +45,14 @@ module.exports = {
       }
       try {
         let recordedMessage = await findMesseges(id);
-        getAdmin()
-        .then(admin => {
-          if(admin[0] === 0 || admin[0].socketId === undefined) return console.log('getAdmin - ОШИБКА!')
-          console.log('getAdmin: ', admin[0].socketId)
-          io.to(admin[0].socketId).emit('newMessage', recordedMessage[0]);
-          // 
-        })
-        .catch(err => console.log(err))
+        ManagerController.getAdmin()
+          .then(admin => {
+            if(admin[0] === 0 || admin[0].socketId === undefined) return console.log('getAdmin - ОШИБКА!')
+            console.log('getAdmin: ', admin[0].socketId)
+            io.to(admin[0].socketId).emit('newMessage', recordedMessage[0]);
+            // 
+          })
+          .catch(err => console.log(err))
       //io.to(socket.id).emit('notification', 'Менеджер offline!');
       // Опеределяем дефолтные настроки обратного уведомления  для callback
       // В зависимости от результата поиска добовляем или обновляем socketId
@@ -56,6 +68,7 @@ module.exports = {
       */
 
     });
+    //! УБРАТЬ
     socket.on('setNewSocket', (data) => {
       const { chatId } = data;
       UsersController.online(chatId)
@@ -101,8 +114,11 @@ module.exports = {
         console.log(err);
       })
     });
-    socket.on('disconnect', () => {
-      UsersController.offline(currentSocketId);
+    socket.on('disconnect', async () => {
+      let {chatId} = await UsersController.offline(currentSocketId);
+      console.log('disconnect', chatId, currentSocketId);
+      let {id, socketId} = await ManagerController.getAdmin();
+      if(id && socketId && chatId) io.to(socketId).emit('offline', chatId);
     });
   }
 }
