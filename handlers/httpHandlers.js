@@ -2,23 +2,23 @@ const jwt = require("jsonwebtoken"),
   process = require("process"),
   users = require("../users.json"),
   SECRET_KEY = process.env.PRIVATE_KEY;
-const { get, update } = require('../controllers/ManagerController');
+const ManagerController = require('../controllers/ManagerController');
 
 module.exports = {
   authentication: async (req, res, next) => {
     // Если инициализация пройдена и имеется заголовок авторизации
-    let Manager = await get();
-    if (Manager.length === 1) req.Manager = Manager[0];
-    if (req.Manager && req.headers.authorization) {
+    let manager = await ManagerController.get();
+    if (manager != []) req.manager = manager;
+    if (req.manager && req.headers.authorization) {
       let token = req.headers.authorization.split(" ")[1];
       if (token === "undefined") return next();
       jwt.verify(token, SECRET_KEY, (err, payload) => {
         if (err) console.error("authentication: token is not verified");
         //? Проверка соответствия идентификатора
         if (
-          req.Manager !== undefined &&
+          req.manager !== undefined &&
           payload !== undefined &&
-          req.Manager.id === payload.id
+          req.manager.id === payload.id
         ) {
           req.auth = true;
         }
@@ -27,20 +27,17 @@ module.exports = {
     next();
   },
   messages: (req, res) => {
-    //! ДОРАБОТАТЬ
-    if (req.auth) return res.status(200).send({ login: req.Manager.login });
+    if (req.auth) return res.status(200).send({ login: req.manager.login });
     return res.status(401).send();
   },
   registration: async (req, res) => {
-     //! ДОРАБОТАТЬ
-    let result = await update(req.body.login, req.body.password);
     if (req.initiation === true) return res.send({ success: false });
     return res.send({ success: true });
   },
   authorization: (req, res) => {
-    if (req.body.login === req.Manager.login && req.body.password === req.Manager.password) {
+    if (req.body.login === req.manager.login && req.body.password === req.manager.password) {
       // данные о пользователе
-      const payload = { id: req.Manager.id, login: req.Manager.login };
+      const payload = { id: req.manager.id, login: req.manager.login };
       const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "14m" });
       const refreshToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "30d" });
       const cookieOptions = {
@@ -52,7 +49,7 @@ module.exports = {
       res.cookie("refreshToken", refreshToken, cookieOptions);
       return res.status(200).json({
         token: accessToken,
-        login: req.Manager.login
+        login: req.manager.login
       });
     }
 

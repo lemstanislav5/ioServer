@@ -11,17 +11,17 @@ const ManagerController = require('../controllers/ManagerController');
 module.exports = {
   connection: async (socket) => {
     const currentSocketId = socket.id
-    socket.on('online', async (chatId, callback) => {
+    socket.on('online', (chatId, callback) => {
       //! await ВОЗМОЖНО НЕ НУЖЕН, ВСЕ НУЖНО ОСТАВИТЬ В КОНТРОЛЛЕРАХ
       let checkСhatId, addUser, checkSocket, updateSocketId;
-      checkСhatId = await UsersController.checkСhatId(socket, chatId);
-      if (!checkСhatId) addUser = await UsersController.addUser(socket, chatId);
-      checkSocket = await UsersController.checkSocket(socket, chatId);
-      if (!checkSocket) updateSocketId = await UsersController.updateSocketId(socket, chatId);
+      checkСhatId = UsersController.checkСhatId(socket, chatId);
+      if (!checkСhatId) addUser = UsersController.addUser(socket, chatId);
+      checkSocket = UsersController.checkSocket(socket, chatId);
+      if (!checkSocket) updateSocketId = UsersController.updateSocketId(socket, chatId);
       console.log(JSON.stringify({checkСhatId, addUser, checkSocket, updateSocketId}));
       if(checkСhatId || addUser) {
-        await UsersController.online(chatId);
-        let  {id, socketId} = await ManagerController.get();
+        UsersController.online(chatId);
+        let  {id, socketId} = ManagerController.get();
         log(__filename, 'Данные менеджера', socketId)
         if (socketId === null) {
           log(__filename, 'МЕНЕДЖЕР НЕ ПОДКЛЮЧЕН К СОКЕТУ', socketId);
@@ -30,10 +30,6 @@ module.exports = {
         if(id && socketId) io.to(socketId).emit('online', chatId);
       }
       return callback({checkСhatId, addUser, checkSocket, updateSocketId});
-    })
-
-    socket.on('offline', async (chatId) => {
-      console.log('offline', chatId);
     })
 
     socket.on('newMessage', async (message, callback) => {
@@ -119,11 +115,10 @@ module.exports = {
         console.log(err);
       })
     });
-    socket.on('disconnect', async () => {
-      let {chatId} = await UsersController.offline(currentSocketId);
-
+    socket.on('disconnect', () => {
+      let {chatId} = UsersController.offline(currentSocketId);
       log(__filename, 'disconnect chatId', chatId);
-      let {id, socketId} = await ManagerController.get();
+      let {id, socketId} = ManagerController.get();
       if(id && socketId && chatId) io.to(socketId).emit('offline', chatId);
     });
   }

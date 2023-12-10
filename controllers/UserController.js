@@ -2,7 +2,6 @@ const {
   addUser,
   findUser,
   updateSocketId,
-  updateCurrentUser,
   userOnline,
   userOffline,
   findUserBySocketId,
@@ -39,9 +38,9 @@ class UsersController {
     if (user.length === 0) return false;
     return user[0].socketId;
   }
-  online(chatId){
+  async online(chatId){
     console.log('Сокет ' + chatId + ' online!');
-    userOnline(chatId);
+    await userOnline(chatId);
   }
   async offline(socketId){
     let user = await findUserBySocketId(socketId);

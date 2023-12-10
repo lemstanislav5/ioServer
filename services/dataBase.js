@@ -33,23 +33,20 @@ module.exports = {
         ])
         .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO manager (id, login, password) values ("1", "' + login + '","' + password + '")', []))
     },
-    //users
+    //-----------------------------------users-----------------------------------
     addUser: (chatId, socketId) => (query('data.db3', 'run', 'INSERT INTO users (chatId, socketId) values ("' + chatId + '","' + socketId + '")', [])),
     addMessage: (chatId, socketId, messageId, text, time, type, read) => (query('data.db3', 'run', 'INSERT INTO messeges (chatId, socketId, messageId, text, time, type, read) values ("' +
     chatId + '","' + socketId + '","' + messageId + '","' + text + '","' + time + '","' + type + '","' + read + '")', [])),
     findUser: (chatId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE chatId = "' + chatId + '"', [])),
     updateSocketId: (chatId, socketId) => (query('data.db3', 'run', 'UPDATE users SET socketId=? WHERE chatId=?', [socketId, chatId])),
     getUsers: () => (query('data.db3', 'all', 'SELECT * FROM users', [])),
-    //! Выбор число непрочитанных сообщений
     findMesseges: (messageId) => (query('data.db3', 'all', 'SELECT * FROM messeges WHERE messageId = "' + messageId + '"', [])),
     getMesseges: () => (query('data.db3', 'all', 'SELECT * FROM messeges', [])),
-    updateCurrentUser: (chatId) => (query('data.db3', 'run', 'UPDATE currentUser SET chatId=?', [chatId])),
     userOnline: (chatId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE chatId=?', [1, chatId])),
     findUserBySocketId: (socketId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE socketId = "' + socketId + '"', [])),
     userOffline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [0, socketId])),
-    //manager
-    updateManager: (login, password) => (query('data.db3', 'run', 'UPDATE manager SET login=? password=?', [login, password])),
+    //-----------------------------------manager-----------------------------------
     getManager: () => (query('data.db3', 'all', 'SELECT * FROM manager', [])),
-    updateManager: (socketId) => (query('data.db3', 'all', 'UPDATE manager SET socketId=? WHERE id=1', [socketId])),
+    updateManagerSocketId: (socketId) => (query('data.db3', 'all', 'UPDATE manager SET socketId=? WHERE id=1', [socketId])),
 
 }
