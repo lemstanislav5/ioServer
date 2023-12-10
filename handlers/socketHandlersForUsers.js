@@ -21,7 +21,12 @@ module.exports = {
       console.log(JSON.stringify({checkСhatId, addUser, checkSocket, updateSocketId}));
       if(checkСhatId || addUser) {
         await UsersController.online(chatId);
-        let {id, socketId} = await ManagerController.getAdmin();
+        let  {id, socketId} = await ManagerController.get();
+        log(__filename, 'Данные менеджера', socketId)
+        if (socketId === null) {
+          log(__filename, 'МЕНЕДЖЕР НЕ ПОДКЛЮЧЕН К СОКЕТУ', socketId);
+          return null //! УВЕДОМЛЯЕМ, ЧТО СВЯЗЬ С МЕНЕДЖЕРОМ НЕ УСТАНОВЛЕНА
+        }
         if(id && socketId) io.to(socketId).emit('online', chatId);
       }
       return callback({checkСhatId, addUser, checkSocket, updateSocketId});
@@ -45,11 +50,11 @@ module.exports = {
       }
       try {
         let recordedMessage = await findMesseges(id);
-        ManagerController.getAdmin()
-          .then(admin => {
-            if(admin[0] === 0 || admin[0].socketId === undefined) return console.log('getAdmin - ОШИБКА!')
-            console.log('getAdmin: ', admin[0].socketId)
-            io.to(admin[0].socketId).emit('newMessage', recordedMessage[0]);
+        ManagerController.getManager()
+          .then(Manager => {
+            if(Manager[0] === 0 || Manager[0].socketId === undefined) return console.log('getManager - ОШИБКА!')
+            console.log('getManager: ', Manager[0].socketId)
+            io.to(Manager[0].socketId).emit('newMessage', recordedMessage[0]);
             // 
           })
           .catch(err => console.log(err))
@@ -116,8 +121,9 @@ module.exports = {
     });
     socket.on('disconnect', async () => {
       let {chatId} = await UsersController.offline(currentSocketId);
-      console.log('disconnect', chatId, currentSocketId);
-      let {id, socketId} = await ManagerController.getAdmin();
+
+      log(__filename, 'disconnect chatId', chatId);
+      let {id, socketId} = await ManagerController.get();
       if(id && socketId && chatId) io.to(socketId).emit('offline', chatId);
     });
   }

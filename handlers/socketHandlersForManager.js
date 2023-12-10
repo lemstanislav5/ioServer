@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken'),
 process = require('process'),
-{ getUsers, updateAdmin, getMesseges } = require("../services/dataBase"), 
+{ getUsers, updateManager, getMesseges } = require("../services/dataBase"), 
 users = require("../utilities/users");
 SECRET_KEY = process.env.PRIVATE_KEY;
 
@@ -25,9 +25,9 @@ module.exports = {
   connection: async (socket) => {
     console.log('Менеджер подключился!');
     //! ОСТАНОВИЛСЯ ЗДЕСЬ, ПРОДОЛЖАЕМ С РЕДАКТИРОВАНИЯ СЕРВЕРНОЙ СТОРОНЫ ДЛЯ МЕНЕДЖЕРА
-    updateAdmin(socket.id)
+    updateManager(socket.id)
       .then(res => {
-        console.log('updateAdmin: ', res, socket.id);
+        console.log('updateManager: ', res, socket.id);
       })
       .catch(err => console.log(err));
 

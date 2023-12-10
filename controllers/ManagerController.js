@@ -3,14 +3,14 @@ const {
   addManager,
   findManager,
   getManager,
-  getAdmin,
+  updateManager
  } = require('../services/dataBase');
 
 class ManagerController {
-  async getAdmin() {
-    let res = await getAdmin();
-    console.log(__filename, '\n\x1b[33m Получены данные менеджера: \x1b[0m ', res);
-    return res[0];
+  async get() {
+    let manager = await getManager();
+    log(__filename, 'Получены данные менеджера', manager);
+    return manager[0];
   }
 
   async check(id) {
@@ -21,19 +21,18 @@ class ManagerController {
   }
   async accest(id) {
     await updateManagerAccest(id);
-    console.log('Доступ открыт!');
+    log(__filename, 'Получены доступ менеджера', id);
   }
   async add(id){
     await addManager(id);
-    console.log('Менеджер добавлен!');
+    log(__filename, 'Менеджер добавлен', id);
   }
   find(id){
-    console.log('Получаем менеджера!');
+    log(__filename, 'Поиск менеджера', id);
     return findManager(id);
   }
-  get(){
-    console.log('Получаем менеджера!');
-    return getManager();
+  update(){
+    updateManager(socketId)
   }
 }
 

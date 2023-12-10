@@ -1,3 +1,7 @@
+global.log = (filename, text, data) => {
+  console.log('\x1b[36m%s\x1b[0m',filename);
+  console.log('\x1b[33m' + text + ': \x1b[0m ', data)
+};
 require("dotenv").config();
 // создаем базу данных и добавляем пользователя с паролем и логином - admin
 require("./services/dataBase").init('1', '1')
@@ -15,7 +19,7 @@ const express = require("express"),
   // socket----------------------------------------
   ({ Server } = require("socket.io")),
   // обработчик для менеджера
-  (socketHandlersForAdministrator = require("./handlers/socketHandlersForAdmin")),
+  (socketHandlersForManager = require("./handlers/socketHandlersForManager")),
   // обработчик для пользователя
   (socketHandlersForUsers = require("./handlers/socketHandlersForUsers")),
   (io = new Server(SOCKET_PORT, {
@@ -23,13 +27,13 @@ const express = require("express"),
     pingTimeout: 60000,
     cors: { origin: "*" },
   }));
-//socketHandlersForAdministrator
+//socketHandlersForManager
 io.use((socket, next) =>
-  socketHandlersForAdministrator.authentication(socket, next)
+  socketHandlersForManager.authentication(socket, next)
 );
 io.on("connection", (socket) =>
   socket.authentication === true
-    ? socketHandlersForAdministrator.connection(socket)
+    ? socketHandlersForManager.connection(socket)
     : socketHandlersForUsers.connection(socket)
 );
 // socket----------------------------------------

@@ -45,7 +45,6 @@ class UsersController {
   }
   async offline(socketId){
     let user = await findUserBySocketId(socketId);
-    console.log(user)
     userOffline(socketId);
     return user[0];
   }

@@ -29,9 +29,9 @@ module.exports = {
         return Promise.all([
             query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `messeges` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT,`socketId` TEXT, `messageId` TEXT, `text` TEXT, `time`  INTEGER, `type` TEXT, `read` INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `admin` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `socketId` TEXT, `login` TEXT, `password` TEXT)")
+            query('data.db3', 'run', "CREATE TABLE if not exists `manager` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `socketId` TEXT, `login` TEXT, `password` TEXT)")
         ])
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO admin (id, login, password) values ("1", "' + login + '","' + password + '")', []))
+        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO manager (id, login, password) values ("1", "' + login + '","' + password + '")', []))
     },
     //users
     addUser: (chatId, socketId) => (query('data.db3', 'run', 'INSERT INTO users (chatId, socketId) values ("' + chatId + '","' + socketId + '")', [])),
@@ -47,9 +47,9 @@ module.exports = {
     userOnline: (chatId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE chatId=?', [1, chatId])),
     findUserBySocketId: (socketId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE socketId = "' + socketId + '"', [])),
     userOffline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [0, socketId])),
-    //Admin
-    updateAdmin: (login, password) => (query('data.db3', 'run', 'UPDATE admin SET login=? password=?', [login, password])),
-    getAdmin: () => (query('data.db3', 'all', 'SELECT * FROM admin', [])),
-    updateAdmin: (socketId) => (query('data.db3', 'all', 'UPDATE admin SET socketId=? WHERE id=1', [socketId])),
+    //manager
+    updateManager: (login, password) => (query('data.db3', 'run', 'UPDATE manager SET login=? password=?', [login, password])),
+    getManager: () => (query('data.db3', 'all', 'SELECT * FROM manager', [])),
+    updateManager: (socketId) => (query('data.db3', 'all', 'UPDATE manager SET socketId=? WHERE id=1', [socketId])),
 
 }
