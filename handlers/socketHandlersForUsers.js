@@ -4,7 +4,7 @@ const fs = require("fs"),
       { addMessage, findMesseges, userOnline } = require("../services/dataBase"), 
       { v4: uuidv4 } = require('uuid');
 
-const UsersController = require('../controllers/UserController');
+const UsersController = require('../controllers/UsersController');
 const ManagerController = require('../controllers/ManagerController');
 
 

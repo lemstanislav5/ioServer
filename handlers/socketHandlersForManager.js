@@ -5,6 +5,7 @@ SECRET_KEY = process.env.PRIVATE_KEY;
 
 const ManagerController = require('../controllers/ManagerController');
 const MessegesController = require('../controllers/MessegesController');
+const UsersController = require('../controllers/UsersController');
 
 module.exports = {
   authentication: (socket, next) => {
@@ -25,15 +26,8 @@ module.exports = {
   },
   connection: async (socket) => {
     log(__filename, 'М Е Н Е Д Ж Е Р   П О Д К Л Ю Ч И Л С Я');
-
-    const { chatId } = data;
-    // Устаналиваем chatId текущего пользователя если он не выбран
-    UsersController.setCurrent(chatId);
-    // В зависимости от результата поиска добовляем или обновляем socketId
-    UsersController.addOrUpdateUser(socket, chatId);
-
-
-    await ManagerController.updateSocketId(socket.id);
+    const {socketId} = await ManagerController.get();
+    if (socketId !== socket.id) await ManagerController.updateSocketId(socket.id);
 
     socket.on('getUsers', async (callback) => {
       const users = await UsersController.get();
