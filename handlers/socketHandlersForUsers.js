@@ -6,6 +6,7 @@ const fs = require("fs"),
 
 const UsersController = require('../controllers/UsersController');
 const ManagerController = require('../controllers/ManagerController');
+const { table } = require("console");
 
 
 module.exports = {
@@ -46,14 +47,11 @@ module.exports = {
       }
       try {
         let recordedMessage = await findMesseges(id);
-        ManagerController.getManager()
-          .then(Manager => {
-            if(Manager[0] === 0 || Manager[0].socketId === undefined) return console.log('getManager - ОШИБКА!')
-            console.log('getManager: ', Manager[0].socketId)
-            io.to(Manager[0].socketId).emit('newMessage', recordedMessage[0]);
-            // 
-          })
-          .catch(err => console.log(err))
+        const {socketId} = await ManagerController.get();
+        if(socketId === undefined) return log(__filename, 'Manager socketId is undefined');
+        io.to(socketId).emit('newMessage', recordedMessage[0]);
+        log(__filename, 'Менеджеру передано следующее сообщение');
+        table(recordedMessage[0])
       //io.to(socket.id).emit('notification', 'Менеджер offline!');
       // Опеределяем дефолтные настроки обратного уведомления  для callback
       // В зависимости от результата поиска добовляем или обновляем socketId

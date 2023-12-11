@@ -7,6 +7,7 @@ class ManagerController {
     const messeges = await getMesseges();
     log(__filename, 'Получены сообщения пользователей');
     table(messeges);
+    return messeges;
   }
 }
 

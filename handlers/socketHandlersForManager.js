@@ -35,7 +35,8 @@ module.exports = {
     });
 
     socket.on('getMesseges', async (callback) => {
-      const messeges = MessegesController.get();
+      const messeges = await MessegesController.get();
+      log(__filename, 'Следующее количество сообщений передано менеджеру', messeges.length);
       callback(messeges);
     });
     socket.on('newMessage', async (message, callback) => {
