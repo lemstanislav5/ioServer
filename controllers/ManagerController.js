@@ -8,7 +8,8 @@ const {
 class ManagerController {
   async get() {
     let manager = await getManager();
-    log(__filename, 'Получены данные менеджера', manager);
+    log(__filename, 'Получены данные менеджера');
+    table(manager);
     return manager[0];
   }
 
@@ -23,6 +24,11 @@ class ManagerController {
   async find(id){
     log(__filename, 'Поиск менеджера', id);
     return await findManager(id);
+  }
+  async checkSocket(socket, id) {
+    const manager = await findManager(id);
+    log(__filename, 'Проверка socket.id менеджера', socket, id);
+    return (manager.length > 0 && manager[0].socketId !== socket.id) ? false: true;
   }
   async updateSocketId(SocketId){
     log(__filename, 'Сокет менеджера обновлен на', SocketId);

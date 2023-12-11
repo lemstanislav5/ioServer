@@ -5,46 +5,53 @@ const {
   userOnline,
   userOffline,
   findUserBySocketId,
+  getUsers
 } = require('../services/dataBase');
 
 
 
 class UsersController {
+  async get(){
+    let users = await getUsers();
+    log(__filename, 'Получены данные пользователей');
+    table(users);
+    return users;
+  }
   async checkСhatId(socket, chatId) {
     const user = await findUser(chatId);
-    return (user.length === 0 ) ? false: true; 
+    log(__filename, 'Проверка chatId пользователя', chatId);
+    return (user.length === 0 ) ? false: true;
   }
 
   async addUser(socket, chatId) {
     await addUser(chatId, socket.id);
     const user = await findUser(chatId);
+    log(__filename, 'Добавление chatId пользователя', chatId, socket.id);
     return (user.length === 0 ) ? false: true;
   }
 
   async checkSocket(socket, chatId) {
     const user = await findUser(chatId);
-    return (user.length > 0 && user[0].socketId !== socket.id) ? false: true; 
+    log(__filename, 'Проверка socket.id пользователя', chatId, socket.id);
+    return (user.length > 0 && user[0].socketId !== socket.id) ? false: true;
   }
 
   async updateSocketId(socket, chatId) {
     await updateSocketId(chatId, socket.id);
     const user = await findUser(chatId);
-    return (user.length > 0 && user[0].socketId !== socket.id) ? false: true; 
+    log(__filename, 'Обновление socket.id пользователя', chatId, socket.id);
+    return (user.length > 0 && user[0].socketId !== socket.id) ? false: true;
   }
 
-  async getSocketCurrentUser(chatId) {
-    console.log('Получаем socketId текущего пользовтаеля!');
-    const user = await findUser(chatId);
-    if (user.length === 0) return false;
-    return user[0].socketId;
-  }
   async online(chatId){
-    console.log('Сокет ' + chatId + ' online!');
+    log(__filename, 'Сокет online, chatId', chatId);
     await userOnline(chatId);
   }
+
   async offline(socketId){
     let user = await findUserBySocketId(socketId);
     userOffline(socketId);
+    log(__filename, 'Сокет offline', user[0]);
     return user[0];
   }
 }

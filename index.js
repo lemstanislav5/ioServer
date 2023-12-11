@@ -1,7 +1,10 @@
 global.log = (filename, text, data) => {
   console.log('\x1b[36m%s\x1b[0m',filename);
-  console.log('\x1b[33m' + text + ': \x1b[0m ', data)
+  if (data === undefined) return console.log('\x1b[33m' + text + ': \x1b[0m ');
+  console.log('\x1b[33m' + text + ': \x1b[0m ', data);
 };
+global.table = (data) => console.table(data);
+
 require("dotenv").config();
 // создаем базу данных и добавляем пользователя с паролем и логином - admin
 require("./services/dataBase").init('1', '1')
