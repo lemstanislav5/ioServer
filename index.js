@@ -1,3 +1,7 @@
+global.evant = (filename, evant) => {
+  console.log('\x1b[36m%s\x1b[0m',filename);
+  console.log('\x1b[33m' + 'Cобытие сокета:' + '\x1b[0m \x1b[31m' + evant + '\x1b[31m ');
+}
 global.log = (filename, text, data) => {
   console.log('\x1b[36m%s\x1b[0m',filename);
   if (data === undefined) return console.log('\x1b[33m' + text + ': \x1b[0m ');

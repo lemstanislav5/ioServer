@@ -19,8 +19,9 @@ class UsersController {
   }
   async checkСhatId(socket, chatId) {
     const user = await findUser(chatId);
-    log(__filename, 'Проверка chatId пользователя', chatId);
-    return (user.length === 0 ) ? false: true;
+    const check = (user.length === 0 ) ? false: true;
+    log(__filename, 'Проверка chatId пользователя', check);
+    return check;
   }
 
   async addUser(socket, chatId) {
@@ -30,10 +31,11 @@ class UsersController {
     return (user.length === 0 ) ? false: true;
   }
 
-  async checkSocket(socket, chatId) {
+  async checkSocket(socketId, chatId) {
     const user = await findUser(chatId);
-    log(__filename, 'Проверка socket.id пользователя', chatId, socket.id);
-    return (user.length > 0 && user[0].socketId !== socket.id) ? false: true;
+    const check = (user.length > 0 && user[0].socketId !== socketId) ? false: true
+    log(__filename, 'Проверка socket.id пользователя', check);
+    return check;
   }
 
   async updateSocketId(socket, chatId) {
@@ -47,12 +49,15 @@ class UsersController {
     log(__filename, 'Сокет online, chatId', chatId);
     await userOnline(chatId);
   }
-
-  async offline(socketId){
+  async findBySocketId(socketId){
     let user = await findUserBySocketId(socketId);
-    userOffline(socketId);
-    log(__filename, 'Сокет offline', user[0]);
+    log(__filename, 'Поиск пользователя по сокету');
+    table(user);
     return user[0];
+  }
+  async offline(chatId){
+    await userOffline(chatId);
+    log(__filename, 'Сокет offline', chatId);
   }
 }
 
