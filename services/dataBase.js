@@ -6,7 +6,7 @@ const sqlite3 = require('sqlite3').verbose();
 const query = (file, req, sql, params = []) => {
     return new Promise((resolve, reject) => {
         const db = new sqlite3.Database(file, (err) => {
-            if (err) console.error(err.message);
+            if (err) return log(__filename, 'ОШИБКИ ПРИ ОТКРЫТИИ БАЗЫ ДАННЫХ', err);
         });
         db.serialize(() => db[req](sql, params,
             (err,res) => {
@@ -14,14 +14,11 @@ const query = (file, req, sql, params = []) => {
                 resolve(res);
             }
         ));
-        db.close((err) => {
-            if (err) return console.error(err.message);
+        db.close(err => {
+            if (err) return log(__filename, 'ОШИБКИ ПРИ ЗАКРЫТИИ БАЗЫ ДАННЫХ', err);
+            log(__filename, 'БАЗА ДАННЫХ ЗАКРЫТА');
         });
     })
-    .then((data) => (data))
-    .catch((err) => {
-      console.log(err);
-    });
 }
 
 module.exports = {
