@@ -6,6 +6,7 @@ const ManagerController = require('../controllers/ManagerController');
 
 module.exports = {
   authentication: async (req, res, next) => {
+    log(__filename, 'АУТЕНТИФИКАЦИЯ');
     // Если инициализация пройдена и имеется заголовок авторизации
     let manager = await ManagerController.get();
     if (manager != []) req.manager = manager;
@@ -35,6 +36,7 @@ module.exports = {
     return res.send({ success: true });
   },
   authorization: (req, res) => {
+    log(__filename, 'АВТОРИЗАЦИЯ');
     if (req.body.login === req.manager.login && req.body.password === req.manager.password) {
       // данные о пользователе
       const payload = { id: req.manager.id, login: req.manager.login };
@@ -56,6 +58,7 @@ module.exports = {
     return res.status(404).json({ message: "User not found" });
   },
   refresh: (req, res) => {
+    log(__filename, 'REFRESH');
     const inputRefreshToken = req.cookies.refreshToken;
     if (inputRefreshToken === undefined)
       return res
