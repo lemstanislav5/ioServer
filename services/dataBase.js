@@ -42,6 +42,7 @@ module.exports = {
     userOnline: (chatId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE chatId=?', [1, chatId])),
     findUserBySocketId: (socketId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE socketId = "' + socketId + '"', [])),
     userOffline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [0, socketId])),
+    read: (chatId) => (query('data.db3', 'run', 'UPDATE messeges SET read=? WHERE chatId=?', [1, chatId])),
     //-----------------------------------manager-----------------------------------
     getManager: () => (query('data.db3', 'all', 'SELECT * FROM manager', [])),
     updateManagerSocketId: (socketId) => (query('data.db3', 'all', 'UPDATE manager SET socketId=? WHERE id=1', [socketId])),

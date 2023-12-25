@@ -31,13 +31,19 @@ module.exports = {
 
     socket.on('getUsers', async (callback) => {
       const users = await UsersController.get();
+      log(__filename, 'Событие getUsers', users.length);
       callback(users);
     });
 
     socket.on('getMesseges', async (callback) => {
       const messeges = await MessegesController.get();
-      log(__filename, 'Следующее количество сообщений передано менеджеру', messeges.length);
+      log(__filename, 'Событие getMesseges', messeges.length);
       callback(messeges);
+    });
+    socket.on('read', async ({currentUser}, callback) => {
+      const read = await UsersController.read(currentUser);
+      log(__filename, 'Событие read', currentUser);
+      callback(currentUser);
     });
     socket.on('newMessage', async (message, callback) => {
       log(__filename, 'Новое сообщение менеджера', message);

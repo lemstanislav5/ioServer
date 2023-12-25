@@ -5,7 +5,8 @@ const {
   userOnline,
   userOffline,
   findUserBySocketId,
-  getUsers
+  getUsers,
+  read,
 } = require('../services/dataBase');
 
 
@@ -58,6 +59,10 @@ class UsersController {
   async offline(chatId){
     await userOffline(chatId);
     log(__filename, 'Сокет offline', chatId);
+  }
+  async read(currentUser){
+    await read(currentUser);
+    log(__filename, 'Прочитаны сообщения по чату: ', currentUser);
   }
 }
 
