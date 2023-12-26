@@ -1,5 +1,5 @@
 //! При настройке портов в Ngin необходимо убрать строчку process.env.PORT из handlers_socketHandlersForUsers.js
-
+//! Пользователь не видет прочитано или нет сообщение администратором, только добавление в базу и отправку менеджеру handlers_socketHandlersForUsers.js
 global.evant = (filename, evant) => {
   console.log('\x1b[36m%s\x1b[0m',filename);
   console.log('\x1b[33m' + 'Cобытие сокета:' + '\x1b[0m \x1b[31m' + evant + '\x1b[31m ');

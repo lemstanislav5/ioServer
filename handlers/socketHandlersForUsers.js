@@ -1,12 +1,12 @@
 const fs = require("fs"),
       util = require('../utilities/utilities'),
       process = require('process'),
-      { addMessage, findMesseges, userOnline } = require("../services/dataBase"),
-      { v4: uuidv4 } = require('uuid');
-
-const UsersController = require('../controllers/UsersController');
-const ManagerController = require('../controllers/ManagerController');
-const { table } = require("console");
+      {findMesseges, userOnline} = require("../services/dataBase"),
+      {v4: uuidv4} = require('uuid'),
+      MessegesController = require("../controllers/MessegesController"),
+      UsersController = require('../controllers/UsersController'),
+      ManagerController = require('../controllers/ManagerController'),
+      { table } = require("console");
 
 
 module.exports = {
@@ -22,7 +22,7 @@ module.exports = {
         let  {id, socketId} = await ManagerController.get();
         if (socketId === null) {
           log(__filename, 'МЕНЕДЖЕР НЕ ПОДКЛЮЧЕН К СОКЕТУ', socketId);
-          return null //! УВЕДОМЛЯЕМ, ЧТО СВЯЗЬ С МЕНЕДЖЕРОМ НЕ УСТАНОВЛЕНА
+          return null; //! УВЕДОМЛЯЕМ, ЧТО СВЯЗЬ С МЕНЕДЖЕРОМ НЕ УСТАНОВЛЕНА
         }
         if(id && socketId) io.to(socketId).emit('online', chatId);
       }
@@ -31,43 +31,26 @@ module.exports = {
 
     socket.on('newMessage', async (message, callback) => {
       const { id, text, chatId } = message;
-      let error, answer;
-      // Выполняется запись сообщения в базу данных!
-      try {
-        await addMessage(chatId, socket.id, id, text, new Date().getTime(), 'from', read = 0);
-        error = false, answer = {add: true, send: false};
-      } catch (err) {
-        error = true, answer = {add: false, send: false};
-        console.error(err);
-        return callback(error, answer);
-      }
-      try {
-        let recordedMessage = await findMesseges(id);
-        const {socketId} = await ManagerController.get();
-        if(socketId === undefined) return log(__filename, 'Manager socketId is undefined');
+      let error = false, answer = {add: false, send: false};
+      await MessegesController.add(chatId, socket.id, id, text);
+      answer.add = true;
+      log(__filename, 'Cообщения записано в базу данных, как непрочитанное!');
+      let recordedMessage = await findMesseges(id);
+      const {socketId} = await ManagerController.get();
+      if(socketId !== undefined) {
         io.to(socketId).emit('newMessage', recordedMessage[0]);
-        log(__filename, 'Менеджеру передано следующее сообщение');
-        table(recordedMessage[0])
-      //io.to(socket.id).emit('notification', 'Менеджер offline!');
-      // Опеределяем дефолтные настроки обратного уведомления  для callback
-      // В зависимости от результата поиска добовляем или обновляем socketId
-      } catch (err) {
-        console.error(err);
-        return callback(error, answer);
+        log(__filename, 'Сообщение направлено администратору');
+        answer.send = true;
       }
+      //! необходимо подтвердить получение сообщен
       return callback(error, answer);
       /**
        * Пытаемся добавить сообщение в базу данных, если происходит ошибка отправляем
        * уведомление пользователю { add: false, send: false},
        * если сообщение успешно добавлено обновляем уведомление { add: true, send: false}
       */
+    });
 
-    });
-    //! УБРАТЬ
-    socket.on('setNewSocket', (data) => {
-      const { chatId } = data;
-      UsersController.online(chatId)
-    });
     socket.on('introduce', async (message, callback) => {
       const { name, email, chatId } = message;
       const text = `Пользователь представился как: ${name} ${email} ${chatId}`;
@@ -88,7 +71,7 @@ module.exports = {
         return callback(true, notification);
       }
     });
-    socket.on("upload", async (file, type, callback) => {
+    socket.on('upload', async (file, type, callback) => {
       let section;
       if (type === 'jpeg' || type === 'jpg' || type === 'png') {
         section = 'images';
@@ -103,10 +86,14 @@ module.exports = {
       await util.checkDirectory(dir, fs);
       const fileName = new Date().getTime();
       const pathFile = 'http://' + process.env.HOST + ':' + process.env.PORT + '/api/media/' + section + '/' + fileName + '.' + type;
-      log(__filename, 'При настройке портов в Ngin необходимо убрать строчку process.env.PORT');
-      fs.writeFile(dir + '/' + fileName + '.' + type, file, (err) => {
-        if (!err) return callback({ url: pathFile });
-        callback({url: false});
+      fs.writeFile(dir + '/' + fileName + '.' + type, file, async (err) => {
+        if (err) return callback({url: false});
+        const {socketId} = await ManagerController.get();
+        if(socketId !== null && socketId !== undefined) {
+          io.to(socketId).emit('upload', {type, pathFile});
+          log(__filename, 'Файл отправлен администратору администратору', socketId);
+          callback({ url: pathFile });
+        }
         console.log(err);
       })
     });
