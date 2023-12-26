@@ -102,7 +102,8 @@ module.exports = {
       let dir = process.cwd() + '/media/' + section;
       await util.checkDirectory(dir, fs);
       const fileName = new Date().getTime();
-      const pathFile = 'http://' + process.env.HOST + '/api/media/' + section + '/' + fileName + '.' + type;
+      const pathFile = 'http://' + process.env.HOST + ':' + process.env.PORT + '/api/media/' + section + '/' + fileName + '.' + type;
+      log(__filename, 'При настройке портов в Ngin необходимо убрать строчку process.env.PORT');
       fs.writeFile(dir + '/' + fileName + '.' + type, file, (err) => {
         if (!err) return callback({ url: pathFile });
         callback({url: false});

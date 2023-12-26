@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken"),
   process = require("process"),
-  users = require("../users.json"),
   SECRET_KEY = process.env.PRIVATE_KEY;
 const ManagerController = require('../controllers/ManagerController');
 
