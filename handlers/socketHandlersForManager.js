@@ -41,32 +41,19 @@ module.exports = {
       callback(messeges);
     });
     socket.on('read', async ({currentUser}, callback) => {
-      const read = await UsersController.read(currentUser);
+      const read = await MessegesController.read(currentUser);
       log(__filename, 'Событие read', currentUser);
       callback(currentUser);
     });
-    socket.on('newMessage', async (message, callback) => {
-      log(__filename, 'Новое сообщение менеджера', message);
-      // !const { id, text, chatId } = message;
-      // Опеределяем дефолтные настроки обратного уведомления  для callback
-      // !let notification = {add: false, send: false};
-      // Устаналиваем chatId текущего пользователя если он не выбран
-      // UsersController.setCurrent(chatId);
-      // В зависимости от результата поиска добовляем или обновляем socketId
-      // !UsersController.addOrUpdateUser(socket, chatId);
-      /**
-       * Пытаемся добавить сообщение в базу данных, если происходит ошибка отправляем
-       * уведомление пользователю { add: false, send: false},
-       * если сообщение успешно добавлено обновляем уведомление { add: true, send: false}
-      */
-      // !try {
-      //   MessegesController.add(chatId, socket.id, id, text, new Date().getTime(), 'from', read = 0);
-      //   notification = {...notification, add: true};
-      //   return callback(false, notification);
-      // } catch (err) {
-      //   console.error(err);
-      //   return callback(true, notification);
-      // }
+    socket.on('newMessage', async ({messageId, textMessage, currentUser, type}, callback) => {
+      log(__filename, 'Новое сообщение менеджера', {messageId, textMessage, currentUser, type});
+      const text = textMessage;
+      const chatId = currentUser;
+      await MessegesController.add(chatId, socket.id, messageId, text, type);
+      const socketId = await UsersController.getUserSocketId(chatId);
+      io.to(socketId).emit('newMessage', {messageId, text, chatId, type});
+      console.log(socketId)
+      callback();
     });
     //! setNewSocket удрать, зделать по аналогии с проверкой актуальности сокета у пользователя
     // socket.on('setNewSocket', (data) => {

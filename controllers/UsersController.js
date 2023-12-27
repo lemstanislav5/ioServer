@@ -6,7 +6,6 @@ const {
   userOffline,
   findUserBySocketId,
   getUsers,
-  read,
 } = require('../services/dataBase');
 
 
@@ -45,7 +44,11 @@ class UsersController {
     log(__filename, 'Обновление socket.id пользователя', chatId, socket.id);
     return (user.length > 0 && user[0].socketId !== socket.id) ? false: true;
   }
-
+  async getUserSocketId(chatId) {
+    const user = await findUser(chatId);
+    log(__filename, 'Получен socket.id пользователя', user[0].socketId);
+    return user[0].socketId;
+  }
   async online(chatId){
     log(__filename, 'Сокет online, chatId', chatId);
     await userOnline(chatId);
@@ -59,10 +62,6 @@ class UsersController {
   async offline(chatId){
     await userOffline(chatId);
     log(__filename, 'Сокет offline', chatId);
-  }
-  async read(currentUser){
-    await read(currentUser);
-    log(__filename, 'Прочитаны сообщения по чату: ', currentUser);
   }
 }
 

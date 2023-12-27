@@ -29,26 +29,17 @@ module.exports = {
       return callback({checkСhatId, addUser, checkSocket, updateSocketId});
     })
 
-    socket.on('newMessage', async (message, callback) => {
-      const { id, text, chatId } = message;
-      let error = false, answer = {add: false, send: false};
-      await MessegesController.add(chatId, socket.id, id, text);
-      answer.add = true;
-      log(__filename, 'Cообщения записано в базу данных, как непрочитанное!');
-      let recordedMessage = await findMesseges(id);
+    socket.on('newMessage', async ({messegeId, text, chatId, type}, callback) => {
+      const answer = {get: false, send: false, read: false};
+      await MessegesController.add(chatId, socket.id, messegeId, text, type);
+      answer.addToDataBase = true;
+      let recordedMessage = await findMesseges(messegeId);
       const {socketId} = await ManagerController.get();
-      if(socketId !== undefined) {
-        io.to(socketId).emit('newMessage', recordedMessage[0]);
-        log(__filename, 'Сообщение направлено администратору');
-        answer.send = true;
-      }
-      //! необходимо подтвердить получение сообщен
-      return callback(error, answer);
-      /**
-       * Пытаемся добавить сообщение в базу данных, если происходит ошибка отправляем
-       * уведомление пользователю { add: false, send: false},
-       * если сообщение успешно добавлено обновляем уведомление { add: true, send: false}
-      */
+      if(socketId === undefined) callback(answer)
+      io.to(socketId).emit('newMessage', recordedMessage[0]);//!callback на проверку доставки сообщения админу
+      log(__filename, 'Сообщение направлено администратору', type);
+      answer.sendToAdmin = true;
+      return callback(answer);
     });
 
     socket.on('introduce', async (message, callback) => {
