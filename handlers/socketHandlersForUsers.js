@@ -1,7 +1,7 @@
 const fs = require("fs"),
       util = require('../utilities/utilities'),
       process = require('process'),
-      {findMesseges, userOnline} = require("../services/dataBase"),
+      {userOnline} = require("../services/dataBase"),
       {v4: uuidv4} = require('uuid'),
       MessegesController = require("../controllers/MessegesController"),
       UsersController = require('../controllers/UsersController'),
@@ -28,18 +28,17 @@ module.exports = {
       }
       return callback({checkСhatId, addUser, checkSocket, updateSocketId});
     })
-
-    socket.on('newMessage', async ({messegeId, text, chatId, type}, callback) => {
-      const answer = {get: false, send: false, read: false};
-      await MessegesController.add(chatId, socket.id, messegeId, text, type);
-      answer.addToDataBase = true;
-      let recordedMessage = await findMesseges(messegeId);
+    //fromId, toId, socketId, messageId, text, time, type, read
+    socket.on('newMessage', async ({fromId, text, type}, callback) => {
+      const toId = 'admin', messegeId = uuidv4();//! ОТРЕДАКТИРОВАТЬ
+      await MessegesController.add(fromId, toId, messegeId, text, type);
+      let message = await MessegesController.find(messegeId);
       const {socketId} = await ManagerController.get();
-      if(socketId === undefined) callback(answer)
-      io.to(socketId).emit('newMessage', recordedMessage[0]);//!callback на проверку доставки сообщения админу
-      log(__filename, 'Сообщение направлено администратору', type);
-      answer.sendToAdmin = true;
-      return callback(answer);
+      if(socketId === undefined) callback({error: false})
+      io.to(socketId).emit('newMessage');//!нужен ли callback на проверку доставки сообщения админу
+      log(__filename, 'Сообщение направлено администратору');
+      table(message);
+      return callback(message[0]);
     });
 
     socket.on('introduce', async (message, callback) => {

@@ -2,6 +2,7 @@ const {
   getMesseges,
   addMessage,
   read,
+  findMessege,
  } = require('../services/dataBase');
 
 class MessegesController {
@@ -11,9 +12,17 @@ class MessegesController {
     table(messeges);
     return messeges;
   }
-  async add(chatId, socketId, messageId, text, type){
-    await addMessage(chatId, socketId, messageId, text, new Date().getTime(), type, 0);
-    log(__filename, 'Сообщение добавлено в базу', {chatId, socketId, messageId, text, type});
+  //from, to, messageId, text, time, type, read
+  async add(fromId, toId, messageId, text, type){
+    const time = new Date().getTime(), read = 0;
+    const message = await addMessage(fromId, toId, messageId, text, time, type, read);
+    log(__filename, 'Сообщение добавлено в базу');
+    table(message);
+  }
+  async find(messageId){
+    const message = await findMessege(messageId);
+    log(__filename, 'Поиск сообщения', {message});
+    return message;
   }
   async read(currentUser){
     await read(currentUser);
