@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken'),
 process = require('process'),
+{v4: uuidv4} = require('uuid'),
 users = require("../utilities/users");
 SECRET_KEY = process.env.PRIVATE_KEY;
 
@@ -45,15 +46,17 @@ module.exports = {
       log(__filename, 'Событие read', currentUser);
       callback(currentUser);
     });
-    socket.on('newMessage', async ({messageId, textMessage, currentUser, type}, callback) => {
-      log(__filename, 'Новое сообщение менеджера', {messageId, textMessage, currentUser, type});
-      const text = textMessage;
-      const chatId = currentUser;
-      await MessegesController.add(chatId, socket.id, messageId, text, type);
-      const socketId = await UsersController.getUserSocketId(chatId);
-      io.to(socketId).emit('newMessage', {messageId, text, chatId, type});
-      console.log(socketId)
-      callback();
+    //fromId, toId, socketId, messageId, text, time, type, read
+    socket.on('newMessage', async ({toId, text, time, type}, callback) => {
+      const fromId = 'admin', messegeId = uuidv4();
+      log(__filename, 'Новое сообщение менеджера', {toId, text, time, type});
+      await MessegesController.add(fromId, toId, messegeId, text, time, type);
+      let message = await MessegesController.find(messegeId);
+      const socketId = await UsersController.getUserSocketId(toId);
+      io.to(socketId).emit('newMessage', message[0]);//!нужен ли callback на проверку доставки сообщения админу
+      log(__filename, 'Сообщение направлено пользователю');
+      table(message);
+      return callback(message[0]);
     });
     //! setNewSocket удрать, зделать по аналогии с проверкой актуальности сокета у пользователя
     // socket.on('setNewSocket', (data) => {

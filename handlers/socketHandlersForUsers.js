@@ -29,13 +29,13 @@ module.exports = {
       return callback({checkСhatId, addUser, checkSocket, updateSocketId});
     })
     //fromId, toId, socketId, messageId, text, time, type, read
-    socket.on('newMessage', async ({fromId, text, type}, callback) => {
-      const toId = 'admin', messegeId = uuidv4();//! ОТРЕДАКТИРОВАТЬ
-      await MessegesController.add(fromId, toId, messegeId, text, type);
+    socket.on('newMessage', async ({fromId, text, time, type}, callback) => {
+      const toId = 'admin', messegeId = uuidv4();
+      await MessegesController.add(fromId, toId, messegeId, text, time, type);
       let message = await MessegesController.find(messegeId);
       const {socketId} = await ManagerController.get();
       if(socketId === undefined) callback({error: false})
-      io.to(socketId).emit('newMessage');//!нужен ли callback на проверку доставки сообщения админу
+      io.to(socketId).emit('newMessage', message[0]);//!нужен ли callback на проверку доставки сообщения админу
       log(__filename, 'Сообщение направлено администратору');
       table(message);
       return callback(message[0]);

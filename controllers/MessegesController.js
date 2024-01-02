@@ -13,8 +13,8 @@ class MessegesController {
     return messeges;
   }
   //from, to, messageId, text, time, type, read
-  async add(fromId, toId, messageId, text, type){
-    const time = new Date().getTime(), read = 0;
+  async add(fromId, toId, messageId, text, time, type){
+    const read = 0;
     const message = await addMessage(fromId, toId, messageId, text, time, type, read);
     log(__filename, 'Сообщение добавлено в базу');
     table(message);

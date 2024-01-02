@@ -47,7 +47,7 @@ module.exports = {
       fromId + '","' + toId + '","' + messageId + '","' + text + '","' + time + '","' + type + '","' + read + '")', [])),
     findMessege: messageId => (query('data.db3', 'all', 'SELECT * FROM messeges WHERE messageId=?', [messageId])),
     getMesseges: () => (query('data.db3', 'all', 'SELECT * FROM messeges', [])),
-    read: (chatId) => (query('data.db3', 'run', 'UPDATE messeges SET read=? WHERE chatId=?', [1, chatId])),
+    read: (chatId) => (query('data.db3', 'run', 'UPDATE messeges SET read=? WHERE fromId=? OR toId=?', [1, chatId])),
     //-----------------------------------manager-----------------------------------
     getManager: () => (query('data.db3', 'all', 'SELECT * FROM manager', [])),
     updateManagerSocketId: (socketId) => (query('data.db3', 'all', 'UPDATE manager SET socketId=? WHERE id=1', [socketId])),
