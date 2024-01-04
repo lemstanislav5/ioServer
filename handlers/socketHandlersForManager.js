@@ -26,9 +26,8 @@ module.exports = {
     }
   },
   connection: async (socket) => {
-    log(__filename, 'М Е Н Е Д Ж Е Р   П О Д К Л Ю Ч И Л С Я');
-    const {socketId} = await ManagerController.get();
-    if (socketId !== socket.id) await ManagerController.updateSocketId(socket.id);
+    log(__filename, 'М Е Н Е Д Ж Е Р   П О Д К Л Ю Ч И Л С Я, socketId: ', socket.id);
+    await ManagerController.updateSocketId(socket.id);
 
     socket.on('getUsers', async (callback) => {
       const users = await UsersController.get();
@@ -87,20 +86,10 @@ module.exports = {
       }
     });
     socket.on("upload", async (file, type, callback) => {
-      let section;
-      if (type === 'jpeg' || type === 'jpg' || type === 'png') {
-        section = 'images';
-      } else if (type === 'pdf' || type === 'doc' || type === 'docx' || type === 'txt') {
-        section =  'documents';
-      } else if (type === 'mp3') {
-        section = 'audio';
-      } else if (type === 'mp4') {
-        section = 'video';
-      }
-      let dir = process.cwd() + '/media/' + section;
+      let dir = process.cwd() + '/media/' + type;
       await util.checkDirectory(dir, fs);
       const fileName = new Date().getTime();
-      const pathFile = 'http://' + process.env.HOST + '/api/media/' + section + '/' + fileName + '.' + type;
+      const pathFile = 'http://' + process.env.HOST + '/api/media/' + type + '/' + fileName + '.' + type;
       fs.writeFile(dir + '/' + fileName + '.' + type, file, (err) => {
         if (!err) return callback({ url: pathFile });
         callback({url: false});

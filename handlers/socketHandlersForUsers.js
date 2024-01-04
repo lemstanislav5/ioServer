@@ -62,29 +62,17 @@ module.exports = {
       }
     });
     socket.on('upload', async (file, type, callback) => {
-      let section;
-      if (type === 'jpeg' || type === 'jpg' || type === 'png') {
-        section = 'images';
-      } else if (type === 'pdf' || type === 'doc' || type === 'docx' || type === 'txt') {
-        section =  'documents';
-      } else if (type === 'mp3') {
-        section = 'audio';
-      } else if (type === 'mp4') {
-        section = 'video';
-      }
-      let dir = process.cwd() + '/media/' + section;
+      let dir = process.cwd() + '/media/' + type;
       await util.checkDirectory(dir, fs);
       const fileName = new Date().getTime();
-      const pathFile = 'http://' + process.env.HOST + ':' + process.env.PORT + '/api/media/' + section + '/' + fileName + '.' + type;
+      const pathFile = 'http://' + process.env.HOST + ':' + process.env.PORT + '/api/media/' + type + '/' + fileName + '.' + type;
       fs.writeFile(dir + '/' + fileName + '.' + type, file, async (err) => {
-        if (err) return callback({url: false});
         const {socketId} = await ManagerController.get();
-        if(socketId !== null && socketId !== undefined) {
-          io.to(socketId).emit('upload', {type, pathFile});
-          log(__filename, 'Файл отправлен администратору администратору', socketId);
-          callback({ url: pathFile });
-        }
-        console.log(err);
+        console.log(socketId)
+        if (err || socketId === null && socketId === undefined) return callback({url: false});
+        io.to(socketId).emit('upload', {type, pathFile});
+        log(__filename, 'Файл отправлен администратору администратору', socketId);
+        return callback({ url: pathFile });
       })
     });
     socket.on('disconnect', async () => {
