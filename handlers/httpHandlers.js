@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken"),
   process = require("process"),
   SECRET_KEY = process.env.PRIVATE_KEY;
-const ManagerController = require('../controllers/ManagerController');
+const ManagerController = require('../controllers/AdminController');
 
 module.exports = {
   authentication: async (req, res, next) => {

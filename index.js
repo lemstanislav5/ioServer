@@ -28,7 +28,7 @@ const express = require("express"),
   // socket----------------------------------------
   ({ Server } = require("socket.io")),
   // обработчик для менеджера
-  (socketHandlersForManager = require("./handlers/socketHandlersForManager")),
+  (socketHandlersForAdmin = require("./handlers/socketHandlersForAdmin")),
   // обработчик для пользователя
   (socketHandlersForUsers = require("./handlers/socketHandlersForUsers")),
   (io = new Server(SOCKET_PORT, {
@@ -36,13 +36,13 @@ const express = require("express"),
     pingTimeout: 60000,
     cors: { origin: "*" },
   }));
-//socketHandlersForManager
+//socketHandlersForAdmin
 io.use((socket, next) =>
-  socketHandlersForManager.authentication(socket, next)
+  socketHandlersForAdmin.authentication(socket, next)
 );
 io.on("connection", (socket) =>
   socket.authentication === true
-    ? socketHandlersForManager.connection(socket)
+    ? socketHandlersForAdmin.connection(socket)
     : socketHandlersForUsers.connection(socket)
 );
 // socket----------------------------------------

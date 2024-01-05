@@ -1,10 +1,12 @@
 const jwt = require('jsonwebtoken'),
+fs = require("fs"),
+Utilities = require('../utilities/utilities'),
 process = require('process'),
 {v4: uuidv4} = require('uuid'),
 users = require("../utilities/users");
 SECRET_KEY = process.env.PRIVATE_KEY;
 
-const ManagerController = require('../controllers/ManagerController');
+const ManagerController = require('../controllers/AdminController');
 const MessegesController = require('../controllers/MessegesController');
 const UsersController = require('../controllers/UsersController');
 
@@ -57,43 +59,22 @@ module.exports = {
       table(message);
       return callback(message[0]);
     });
-    //! setNewSocket удрать, зделать по аналогии с проверкой актуальности сокета у пользователя
-    // socket.on('setNewSocket', (data) => {
-    //   const { chatId } = data;
-    //   // Устаналиваем chatId текущего пользователя если он не выбран
-    //   UsersController.setCurrent(chatId);
-    //   // В зависимости от результата поиска добовляем или обновляем socketId
-    //   UsersController.addOrUpdateUser(socket, chatId);
-    // });
-    socket.on('introduce', async (message, callback) => {
-      const { name, email, chatId } = message;
-      const text = `Пользователь представился как: ${name} ${email} ${chatId}`;
-      // Опеределяем дефолтные настроки обратного уведомления для callback
-      let notification = {add: false, send: false}
-      /**
-       * Пытаемся добавить "name" и "email" в базу данных, если происходит ошибка отправляем
-       * уведомление пользователю { add: false, send: false},
-       * если сообщение успешно добавлено обновляем уведомление { add: true, send: false}
-      */
-      try {
-        UsersController.setNameAndEmail(name, email, chatId);
-        MessegesController.add(chatId, socket.id, id, text, new Date().getTime(), 'from', read = 0);
-        notification = {...notification, add: true};
-        return callback(false, notification);
-      } catch (err) {
-        console.error(err);
-        return callback(true, notification);
-      }
-    });
-    socket.on("upload", async (file, type, callback) => {
+    
+    socket.on("upload", async (file, {toId, time, type}, callback) => {
       let dir = process.cwd() + '/media/' + type;
-      await util.checkDirectory(dir, fs);
+      await Utilities.checkDirectory(dir, fs);
       const fileName = new Date().getTime();
-      const pathFile = 'http://' + process.env.HOST + '/api/media/' + type + '/' + fileName + '.' + type;
-      fs.writeFile(dir + '/' + fileName + '.' + type, file, (err) => {
-        if (!err) return callback({ url: pathFile });
-        callback({url: false});
-        log(__filename, 'fs.writeFile error', err);
+      const text = 'http://' + process.env.HOST + ':' + process.env.PORT + '/api/media/' + type + '/' + fileName + '.' + type;
+      fs.writeFile(dir + '/' + fileName + '.' + type, file, async (err) => {
+        const fromId = 'admin', messegeId = uuidv4();
+        await MessegesController.add(fromId, toId, messegeId, text, time, type);
+        let message = await MessegesController.find(messegeId);
+        const socketId = await UsersController.getUserSocketId(toId);
+        if (err) return callback(false);
+        io.to(socketId).emit('newMessage', message[0]);
+        log(__filename, 'Файл направлен пользователю');
+        table(message);
+        return callback(message[0]);
       })
     });
     socket.on('disconnect', () => {

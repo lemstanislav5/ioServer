@@ -27,7 +27,7 @@ const query = (file, req, sql, params = []) => {
 module.exports = {
     init: (login, password) => {
         return Promise.all([
-            query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `online` INTEGER)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `email` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `messeges` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `fromId` TEXT, `toId` TEXT, `messageId` TEXT, `text` TEXT, `time` INTEGER, `type` TEXT, `read` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `manager` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT, `socketId` TEXT, `login` TEXT, `password` TEXT)")
         ])
@@ -38,6 +38,7 @@ module.exports = {
     findUser: (chatId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE chatId = "' + chatId + '"', [])),
     updateSocketId: (chatId, socketId) => (query('data.db3', 'run', 'UPDATE users SET socketId=? WHERE chatId=?', [socketId, chatId])),
     getUsers: () => (query('data.db3', 'all', 'SELECT * FROM users', [])),
+    introduce: (chatId, name, email) => (query('data.db3', 'run', 'UPDATE users SET name=?, email=? WHERE chatId=?', [name, email, chatId])),
     userOnline: (chatId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE chatId=?', [1, chatId])),
     userOffline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [0, socketId])),
     findUserBySocketId: (socketId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE socketId = "' + socketId + '"', [])),

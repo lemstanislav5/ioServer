@@ -6,6 +6,7 @@ const {
   userOffline,
   findUserBySocketId,
   getUsers,
+  introduce,
 } = require('../services/dataBase');
 
 
@@ -30,7 +31,10 @@ class UsersController {
     log(__filename, 'Добавление chatId пользователя', chatId, socket.id);
     return (user.length === 0 ) ? false: true;
   }
-
+  async introduce(name, email, fromId) {
+    await introduce(name, email, fromId);
+    log(__filename, 'Пользователь представился: ', {name, email, fromId});
+  }
   async checkSocket(socketId, chatId) {
     const user = await findUser(chatId);
     const check = (user.length > 0 && user[0].socketId !== socketId) ? false: true

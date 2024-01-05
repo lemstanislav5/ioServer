@@ -1,11 +1,11 @@
 const fs = require("fs"),
-      util = require('../utilities/utilities'),
+      Utilities = require('../utilities/utilities'),
       process = require('process'),
       {userOnline} = require("../services/dataBase"),
       {v4: uuidv4} = require('uuid'),
       MessegesController = require("../controllers/MessegesController"),
       UsersController = require('../controllers/UsersController'),
-      ManagerController = require('../controllers/ManagerController'),
+      ManagerController = require('../controllers/AdminController'),
       { table } = require("console");
 
 
@@ -35,44 +35,41 @@ module.exports = {
       let message = await MessegesController.find(messegeId);
       const {socketId} = await ManagerController.get();
       if(socketId === undefined) callback({error: false})
-      io.to(socketId).emit('newMessage', message[0]);//!нужен ли callback на проверку доставки сообщения админу
+      io.to(socketId).emit('newMessage', message[0]);
       log(__filename, 'Сообщение направлено администратору');
       table(message);
       return callback(message[0]);
     });
 
-    socket.on('introduce', async (message, callback) => {
-      const { name, email, chatId } = message;
-      const text = `Пользователь представился как: ${name} ${email} ${chatId}`;
-      // Опеределяем дефолтные настроки обратного уведомления для callback
-      let notification = {add: false, send: false}
-      /**
-       * Пытаемся добавить "name" и "email" в базу данных, если происходит ошибка отправляем
-       * уведомление пользователю { add: false, send: false},
-       * если сообщение успешно добавлено обновляем уведомление { add: true, send: false}
-      */
-      try {
-        UsersController.setNameAndEmail(name, email, chatId);
-        MessegesController.add(chatId, socket.id, id, text, new Date().getTime(), 'from', read = 0);
-        notification = {...notification, add: true};
-        return callback(false, notification);
-      } catch (err) {
-        console.error(err);
-        return callback(true, notification);
-      }
+    socket.on('introduce', async ({chatId, name, email}, callback) => {
+      const text = `Пользователь представился как: ${name} ${email}`;
+      const toId = 'admin', messegeId = uuidv4(), fromId = chatId;
+      await UsersController.introduce(name, email, fromId);
+      await MessegesController.add(fromId, toId, messegeId, text, time = new Date().getTime(), type = 'text', read = 0);
+      const message = await MessegesController.find(messegeId);
+      const {socketId} = await ManagerController.get();
+      if(socketId === undefined) callback(false)
+      io.to(socketId).emit('newMessage', message[0]);
+      io.to(socketId).emit('introduce', {fromId, name, email});
+      log(__filename, 'Сообщение направлено администратору');
+      table(message);
+      return callback(message[0]);
     });
-    socket.on('upload', async (file, type, callback) => {
+    socket.on('upload', async (file, {fromId, time, type}, callback) => {
       let dir = process.cwd() + '/media/' + type;
-      await util.checkDirectory(dir, fs);
+      await Utilities.checkDirectory(dir, fs);
       const fileName = new Date().getTime();
-      const pathFile = 'http://' + process.env.HOST + ':' + process.env.PORT + '/api/media/' + type + '/' + fileName + '.' + type;
+      const text = 'http://' + process.env.HOST + ':' + process.env.PORT + '/api/media/' + type + '/' + fileName + '.' + type;
       fs.writeFile(dir + '/' + fileName + '.' + type, file, async (err) => {
+        const toId = 'admin', messegeId = uuidv4();
+        await MessegesController.add(fromId, toId, messegeId, text, time, type);
+        let message = await MessegesController.find(messegeId);
         const {socketId} = await ManagerController.get();
         console.log(socketId)
-        if (err || socketId === null && socketId === undefined) return callback({url: false});
-        io.to(socketId).emit('upload', {type, pathFile});
+        if (err || socketId === null && socketId === undefined) return callback(false);
+        io.to(socketId).emit('upload', message[0]);
         log(__filename, 'Файл отправлен администратору администратору', socketId);
-        return callback({ url: pathFile });
+        return callback(message[0]);
       })
     });
     socket.on('disconnect', async () => {
