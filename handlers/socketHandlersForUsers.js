@@ -8,13 +8,8 @@ const fs = require("fs"),
       ManagerController = require('../controllers/AdminController'),
       { table } = require("console");
 
-
 module.exports = {
   connection: async (socket) => {
-    socket.join('users');
-    const clients = io.sockets.adapter.rooms.get('users');
-    log(__filename, 'Список клиентов комнаты: ', clients);
-    //! ВОЗМОЖНОСТЬ ОБРАНВЛЕНИЯ СВЕДЕНИЙ О ПОЛЬЗОВАТЕЛЯХ ОНЛАЙН
     socket.on('online', async (chatId, callback) => {
       let checkСhatId, addUser, checkSocket, updateSocketId;
       checkСhatId = await UsersController.checkСhatId(socket, chatId);
@@ -24,15 +19,12 @@ module.exports = {
       if(checkСhatId || addUser) {
         UsersController.online(chatId);
         let  {id, socketId} = await ManagerController.get();
-        if (socketId === null) {
-          log(__filename, 'МЕНЕДЖЕР НЕ ПОДКЛЮЧЕН К СОКЕТУ', socketId);
-          return null; //! УВЕДОМЛЯЕМ, ЧТО СВЯЗЬ С МЕНЕДЖЕРОМ НЕ УСТАНОВЛЕНА
-        }
+        if (socketId === null) callback(false); //АДМИН НЕ ПОДКЛЮЧЕН К СОКЕТУ
         if(id && socketId) io.to(socketId).emit('online', chatId);
       }
-      return callback({checkСhatId, addUser, checkSocket, updateSocketId});
-    })
-    //fromId, toId, socketId, messageId, text, time, type, read
+      return callback(true);
+    });
+
     socket.on('newMessage', async ({fromId, text, time, type}, callback) => {
       const toId = 'admin', messegeId = uuidv4();
       await MessegesController.add(fromId, toId, messegeId, text, time, type);
@@ -59,6 +51,7 @@ module.exports = {
       table(message);
       return callback(message[0]);
     });
+
     socket.on('upload', async (file, {fromId, time, type}, callback) => {
       let dir = process.cwd() + '/media/' + type;
       await Utilities.checkDirectory(dir, fs);
@@ -76,30 +69,20 @@ module.exports = {
         return callback(message[0]);
       })
     });
+
     socket.on('disconnect', async () => {
-      const clients = io.sockets.adapter.rooms.get('users');
-      log(__filename, 'Список клиентов комнаты: ', clients);
-      //! ВОЗМОЖНОСТЬ ОБРАНВЛЕНИЯ СВЕДЕНИЙ О ПОЛЬЗОВАТЕЛЯХ ОНЛАЙН
       evant(__filename, 'D I S C O N N E C T');
       const user = await UsersController.findBySocketId(socket.id);
       if (user !== undefined) {
         const chatId = user.chatId;
-        await UsersController.offline(socket.id);
+        log(__filename, 'Пользователь отсоединился', user);
+        await UsersController.offline(chatId);
         let  {id, socketId} = await ManagerController.get();
-        if (socketId === null) {
-          log(__filename, 'МЕНЕДЖЕР НЕ ПОДКЛЮЧЕН К СОКЕТУ', socketId);
-          return null //! УВЕДОМЛЯЕМ, ЧТО СВЯЗЬ С МЕНЕДЖЕРОМ НЕ УСТАНОВЛЕНА
-        }
+        if (socketId === null) return null; //МЕНЕДЖЕР НЕ ПОДКЛЮЧЕН К СОКЕТУ
         if (socketId && chatId) io.to(socketId).emit('offline', chatId);
-        log(__filename, 'Пользователь отсоединился', 'статус offline');
       } else {
         log(__filename, 'Пользователь отсоединился', 'сокет в базе не найден, статус не изменен!!!');
       }
-      // let data = await UsersController.offline(socket.id);
-      // log(__filename, 'disconnect chatId', data);
-      // if (data.chatId === undefined) return log(__filename, 'disconnect chatId', data);
-      // let {id, socketId} = ManagerController.get();
-      // if(id && socketId && chatId) io.to(socketId).emit('offline', chatId);
     });
   }
 }

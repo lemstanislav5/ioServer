@@ -19,7 +19,6 @@ const query = (file, req, sql, params = []) => {
         ));
         db.close(err => {
             if (err) return log(__filename, 'ОШИБКИ ПРИ ЗАКРЫТИИ БАЗЫ ДАННЫХ', err);
-            log(__filename, 'БАЗА ДАННЫХ ЗАКРЫТА');
         });
     })
 }
@@ -40,7 +39,7 @@ module.exports = {
     getUsers: () => (query('data.db3', 'all', 'SELECT * FROM users', [])),
     introduce: (chatId, name, email) => (query('data.db3', 'run', 'UPDATE users SET name=?, email=? WHERE chatId=?', [name, email, chatId])),
     userOnline: (chatId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE chatId=?', [1, chatId])),
-    userOffline: (socketId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE socketId=?', [0, socketId])),
+    userOffline: (chatId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE chatId=?', [0, chatId])),
     findUserBySocketId: (socketId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE socketId = "' + socketId + '"', [])),
     //-----------------------------------messeges-----------------------------------
     //from, to, socketId, messageId, text, time, type, read

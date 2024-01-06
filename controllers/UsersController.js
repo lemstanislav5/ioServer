@@ -24,7 +24,6 @@ class UsersController {
     log(__filename, 'Проверка chatId пользователя', check);
     return check;
   }
-
   async addUser(socket, chatId) {
     await addUser(chatId, socket.id);
     const user = await findUser(chatId);
@@ -41,7 +40,6 @@ class UsersController {
     log(__filename, 'Проверка socket.id пользователя', check);
     return check;
   }
-
   async updateSocketId(socket, chatId) {
     await updateSocketId(chatId, socket.id);
     const user = await findUser(chatId);
@@ -65,7 +63,7 @@ class UsersController {
   }
   async offline(chatId){
     await userOffline(chatId);
-    log(__filename, 'Сокет offline', chatId);
+    log(__filename, 'Пользователь offline', chatId);
   }
 }
 
