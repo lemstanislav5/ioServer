@@ -26,11 +26,15 @@ const query = (file, req, sql, params = []) => {
 module.exports = {
     init: (login, password) => {
         return Promise.all([
+            //`url`, `ws`, `port`, `colors`, `testData`, `initialFirstQuestions`, `filesType`, `limitSizeFile`, `contacts`, `consentLink`, `policyLink`
+            query('data.db3', 'run', "CREATE TABLE if not exists `setings` (`url` TEXT, `ws` TEXT, `port` TEXT, `consentLink` TEXT, `policyLink` TEXT)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `colors` (`chatId` TEXT, `socketId` TEXT, `name` TEXT, `email` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `email` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `messeges` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `fromId` TEXT, `toId` TEXT, `messageId` TEXT, `text` TEXT, `time` INTEGER, `type` TEXT, `read` INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `manager` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT, `socketId` TEXT, `login` TEXT, `password` TEXT)")
+            query('data.db3', 'run', "CREATE TABLE if not exists `manager` (`chatId` TEXT, `socketId` TEXT, `login` TEXT, `password` TEXT)")
         ])
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO manager (id, chatId, login, password) values ("1", "admin", "' + login + '","' + password + '")', []))
+        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO manager (id, chatId, login, password) values ("1", "admin", "1","1")', []))
+        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setings (url, ws, port, consentLink, policyLink) values ("localhost", "ws", "4000", "", "")', []))
     },
     //-----------------------------------users-----------------------------------
     addUser: (chatId, socketId) => (query('data.db3', 'run', 'INSERT INTO users (chatId, socketId) values ("' + chatId + '","' + socketId + '")', [])),
