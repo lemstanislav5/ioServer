@@ -20,7 +20,11 @@ module.exports = {
         UsersController.online(chatId);
         let  {id, socketId} = await ManagerController.get();
         if (socketId === null) callback(false); //АДМИН НЕ ПОДКЛЮЧЕН К СОКЕТУ
-        if(id && socketId) io.to(socketId).emit('online', chatId);
+        if(id && socketId) {
+          io.to(socketId).emit('online', chatId);
+          const users = await UsersController.get();
+          io.to(socketId).emit('getUsers', users);
+        }
       }
       return callback(true);
     });
@@ -44,11 +48,10 @@ module.exports = {
       await MessegesController.add(fromId, toId, messegeId, text, time = new Date().getTime(), type = 'text', read = 0);
       const message = await MessegesController.find(messegeId);
       const {socketId} = await ManagerController.get();
+      log(__filename, 'socketId', socketId);
       if(socketId === undefined) callback(false)
       io.to(socketId).emit('newMessage', message[0]);
       io.to(socketId).emit('introduce', {fromId, name, email});
-      log(__filename, 'Сообщение направлено администратору');
-      table(message);
       return callback(message[0]);
     });
 
