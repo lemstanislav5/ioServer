@@ -11,6 +11,10 @@ const fs = require("fs"),
 
 module.exports = {
   connection: async (socket) => {
+    socket.join('users');
+    const clients = io.sockets.adapter.rooms.get('users');
+    log(__filename, 'Список клиентов комнаты: ', clients);
+    //! ВОЗМОЖНОСТЬ ОБРАНВЛЕНИЯ СВЕДЕНИЙ О ПОЛЬЗОВАТЕЛЯХ ОНЛАЙН
     socket.on('online', async (chatId, callback) => {
       let checkСhatId, addUser, checkSocket, updateSocketId;
       checkСhatId = await UsersController.checkСhatId(socket, chatId);
@@ -73,6 +77,9 @@ module.exports = {
       })
     });
     socket.on('disconnect', async () => {
+      const clients = io.sockets.adapter.rooms.get('users');
+      log(__filename, 'Список клиентов комнаты: ', clients);
+      //! ВОЗМОЖНОСТЬ ОБРАНВЛЕНИЯ СВЕДЕНИЙ О ПОЛЬЗОВАТЕЛЯХ ОНЛАЙН
       evant(__filename, 'D I S C O N N E C T');
       const user = await UsersController.findBySocketId(socket.id);
       if (user !== undefined) {

@@ -59,8 +59,9 @@ module.exports = {
       table(message);
       return callback(message[0]);
     });
-    
+
     socket.on("upload", async (file, {toId, time, type}, callback) => {
+      console.log(toId, time, type)
       let dir = process.cwd() + '/media/' + type;
       await Utilities.checkDirectory(dir, fs);
       const fileName = new Date().getTime();
