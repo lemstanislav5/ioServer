@@ -9,6 +9,7 @@ SECRET_KEY = process.env.PRIVATE_KEY;
 const ManagerController = require('../controllers/AdminController');
 const MessegesController = require('../controllers/MessegesController');
 const UsersController = require('../controllers/UsersController');
+const SetingsController = require('../controllers/SetingsController');
 
 module.exports = {
   authentication: (socket, next) => {
@@ -47,14 +48,14 @@ module.exports = {
       log(__filename, 'Событие read', currentUser);
       callback(currentUser);
     });
-    //fromId, toId, socketId, messageId, text, time, type, read
+
     socket.on('newMessage', async ({toId, text, time, type}, callback) => {
       const fromId = 'admin', messegeId = uuidv4();
       log(__filename, 'Новое сообщение менеджера', {toId, text, time, type});
       await MessegesController.add(fromId, toId, messegeId, text, time, type);
       let message = await MessegesController.find(messegeId);
       const socketId = await UsersController.getUserSocketId(toId);
-      io.to(socketId).emit('newMessage', message[0]);//!нужен ли callback на проверку доставки сообщения админу
+      io.to(socketId).emit('newMessage', message[0]);
       log(__filename, 'Сообщение направлено пользователю');
       table(message);
       return callback(message[0]);
@@ -80,8 +81,11 @@ module.exports = {
     });
     socket.on('disconnect', () => {
       log(__filename, 'disconnect', socket.id);
-      // UsersController.delCurrent();
-      //UsersController.offline(currentSocketId);
+    });
+    socket.on('getSetings', async callback => {
+      log(__filename, 'getSetings');
+      let setings = await SetingsController.get();
+      return callback(setings);
     });
   }
 }

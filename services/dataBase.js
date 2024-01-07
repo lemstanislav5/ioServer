@@ -27,15 +27,17 @@ module.exports = {
     init: (login, password) => {
         return Promise.all([
             //`url`, `ws`, `port`, `colors`, `testData`, `initialFirstQuestions`, `filesType`, `limitSizeFile`, `contacts`, `consentLink`, `policyLink`
-            query('data.db3', 'run', "CREATE TABLE if not exists `setings` (`url` TEXT, `ws` TEXT, `port` TEXT, `consentLink` TEXT, `policyLink` TEXT)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `colors` (`chatId` TEXT, `socketId` TEXT, `name` TEXT, `email` TEXT, `online` INTEGER)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `setings` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT, `ws` TEXT, `port` TEXT, `consentLink` TEXT, `policyLink` TEXT)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `colors` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT, `socketId` TEXT, `name` TEXT, `email` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `email` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `messeges` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `fromId` TEXT, `toId` TEXT, `messageId` TEXT, `text` TEXT, `time` INTEGER, `type` TEXT, `read` INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `manager` (`chatId` TEXT, `socketId` TEXT, `login` TEXT, `password` TEXT)")
+            query('data.db3', 'run', "CREATE TABLE if not exists `admin` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT, `socketId` TEXT, `login` TEXT, `password` TEXT)")
         ])
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO manager (id, chatId, login, password) values ("1", "admin", "1","1")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setings (url, ws, port, consentLink, policyLink) values ("localhost", "ws", "4000", "", "")', []))
+        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO admin (id, chatId, login, password) values ("1", "admin", "1","1")', []))
+        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setings (id, url, ws, port, consentLink, policyLink) values ("1", "localhost", "ws", "4000", "", "")', []))
     },
+    //-----------------------------------setings-----------------------------------
+    getSetings: () => (query('data.db3', 'all', 'SELECT * FROM setings', [])),
     //-----------------------------------users-----------------------------------
     addUser: (chatId, socketId) => (query('data.db3', 'run', 'INSERT INTO users (chatId, socketId) values ("' + chatId + '","' + socketId + '")', [])),
     findUser: (chatId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE chatId = "' + chatId + '"', [])),
@@ -52,7 +54,7 @@ module.exports = {
     findMessege: messageId => (query('data.db3', 'all', 'SELECT * FROM messeges WHERE messageId=?', [messageId])),
     getMesseges: () => (query('data.db3', 'all', 'SELECT * FROM messeges', [])),
     read: (chatId) => (query('data.db3', 'run', 'UPDATE messeges SET read=? WHERE fromId=? OR toId=?', [1, chatId])),
-    //-----------------------------------manager-----------------------------------
-    getManager: () => (query('data.db3', 'all', 'SELECT * FROM manager', [])),
-    updateManagerSocketId: (socketId) => (query('data.db3', 'all', 'UPDATE manager SET socketId=? WHERE id=1', [socketId])),
+    //-----------------------------------admin-----------------------------------
+    getAdmin: () => (query('data.db3', 'all', 'SELECT * FROM admin', [])),
+    updateAdminSocketId: (socketId) => (query('data.db3', 'all', 'UPDATE admin SET socketId=? WHERE id=1', [socketId])),
 }

@@ -1,39 +1,39 @@
 const {
-  updateManagerSocketId,
-  addManager,
-  findManager,
-  getManager,
+  updateAdminSocketId,
+  addAdmin,
+  findAdmin,
+  getAdmin,
  } = require('../services/dataBase');
 
-class ManagerController {
+class AdminController {
   async get() {
-    let manager = await getManager();
+    let admin = await getAdmin();
     log(__filename, 'Получены данные менеджера');
-    table(manager);
-    return manager[0];
+    table(admin);
+    return admin[0];
   }
 
   async accest(id) {
-    await updateManagerAccest(id);
+    await updateAdminAccest(id);
     log(__filename, 'Получены доступ менеджера', id);
   }
   async add(id){
-    await addManager(id);
+    await addAdmin(id);
     log(__filename, 'Менеджер добавлен', id);
   }
   async find(id){
     log(__filename, 'Поиск менеджера', id);
-    return await findManager(id);
+    return await findAdmin(id);
   }
   async checkSocket(socket, id) {
-    const manager = await findManager(id);
+    const admin = await findAdmin(id);
     log(__filename, 'Проверка socket.id менеджера', socket, id);
-    return (manager.length > 0 && manager[0].socketId !== socket.id) ? false: true;
+    return (Admin.length > 0 && admin[0].socketId !== socket.id) ? false: true;
   }
   async updateSocketId(SocketId){
     log(__filename, 'Сокет менеджера обновлен на', SocketId);
-    updateManagerSocketId(SocketId);
+    updateAdminSocketId(SocketId);
   }
 }
 
-module.exports = new ManagerController()
+module.exports = new AdminController()

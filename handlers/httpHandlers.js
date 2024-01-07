@@ -5,8 +5,6 @@ const ManagerController = require('../controllers/AdminController');
 
 module.exports = {
   authentication: async (req, res, next) => {
-    log(__filename, 'АУТЕНТИФИКАЦИЯ');
-    // Если инициализация пройдена и имеется заголовок авторизации
     let manager = await ManagerController.get();
     if (manager != []) req.manager = manager;
     if (req.manager && req.headers.authorization) {
@@ -30,12 +28,7 @@ module.exports = {
     if (req.auth) return res.status(200).send({ login: req.manager.login });
     return res.status(401).send();
   },
-  registration: async (req, res) => {
-    if (req.initiation === true) return res.send({ success: false });
-    return res.send({ success: true });
-  },
   authorization: (req, res) => {
-    log(__filename, 'АВТОРИЗАЦИЯ');
     if (req.body.login === req.manager.login && req.body.password === req.manager.password) {
       // данные о пользователе
       const payload = { id: req.manager.id, login: req.manager.login };
@@ -57,7 +50,6 @@ module.exports = {
     return res.status(404).json({ message: "User not found" });
   },
   refresh: (req, res) => {
-    log(__filename, 'REFRESH');
     const inputRefreshToken = req.cookies.refreshToken;
     if (inputRefreshToken === undefined)
       return res
@@ -68,7 +60,6 @@ module.exports = {
         return res
           .status(400)
           .json({ error: true, message: "refresh token is not verified" });
-      // данные о пользователе
       const payload = { id: tokenDetails.id, login: tokenDetails.login };
       const accessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "14m" });
       const refreshToken = jwt.sign(payload, SECRET_KEY, { expiresIn: "30d" });
@@ -87,7 +78,6 @@ module.exports = {
     });
   },
   logout: (req, res) => {
-    //! ВОЗМОЖНО ОТРАЖАТЬ В БАЗЕ ВРЕМЯ И ДАТУ ВЫХОДА И ОБНОВЛЯТЬ СТАТУС
     const inputRefreshToken = req.cookies.refreshToken;
     if (inputRefreshToken === undefined)
       return res
