@@ -30,8 +30,8 @@ module.exports = {
             query('data.db3', 'run', "CREATE TABLE if not exists `setingsSocketUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT, `ws` TEXT, `port` TEXT)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `setingsConsentUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `consentLink` TEXT, `policyLink` TEXT)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `setingsColorsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `conteiner` TEXT, `top` TEXT, `messeges` TEXT, `fromId` TEXT, `text` TEXT, `notification` TEXT, `toId` TEXT)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `setingsFirstQuestionsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `text` TEXT, onOff INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `contactUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `Telegram` TEXT, `VKontakte` TEXT, `WhatsApp` TEXT)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `setingsQuestionsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `text` TEXT, onOff INTEGER)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `setingsContactUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `Telegram` TEXT, `VKontakte` TEXT, `WhatsApp` TEXT)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `email` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `messeges` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `fromId` TEXT, `toId` TEXT, `messageId` TEXT, `text` TEXT, `time` INTEGER, `type` TEXT, `read` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `admin` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT, `socketId` TEXT, `login` TEXT, `password` TEXT)")
@@ -40,11 +40,15 @@ module.exports = {
         .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsSocketUser (id, url, ws, port) values ("1", "localhost", "ws", "4000")', []))
         .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsConsentUser (id, consentLink, policyLink) values ("1", "", "")', []))
         .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsColorsUser (id, conteiner, top, messeges, fromId, text, notification, toId) values ("1", "#fff", "#2c2e33", "#000", "#303245", "#FFB700", "#333", "#5e785e")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsFirstQuestionsUser (id, text, onOff) values ("1", "Здравствуйте!", "1")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO contactUser (id, Telegram, VKontakte, WhatsApp) values ("1", "", "", "")', []))
+        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsQuestionsUser (id, text, onOff) values ("1", "Здравствуйте!", "1")', []))
+        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsContactUser (id, Telegram, VKontakte, WhatsApp) values ("1", "", "", "")', []))
     },
     //-----------------------------------setings-----------------------------------
-    getSetings: () => (query('data.db3', 'all', 'SELECT * FROM setingsSocketUser', [])),
+    getSetingsSocketUser: () => (query('data.db3', 'all', 'SELECT * FROM setingsSocketUser', [])),
+    getSetingsConsentUser: () => (query('data.db3', 'all', 'SELECT * FROM setingsConsentUser', [])),
+    getSetingsColorsUser: () => (query('data.db3', 'all', 'SELECT * FROM setingsColorsUser', [])),
+    getSetingQuestionsUser: () => (query('data.db3', 'all', 'SELECT * FROM setingsQuestionsUser', [])),
+    getSetingsContactUser: () => (query('data.db3', 'all', 'SELECT * FROM setingsContactUser', [])),
     //-----------------------------------users-----------------------------------
     addUser: (chatId, socketId) => (query('data.db3', 'run', 'INSERT INTO users (chatId, socketId) values ("' + chatId + '","' + socketId + '")', [])),
     findUser: (chatId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE chatId = "' + chatId + '"', [])),
