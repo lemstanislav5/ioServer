@@ -27,11 +27,11 @@ class SetingsController {
       socket: Object.assign({}, await getSetingsSocketUser()),
       consent: Object.assign({}, await getSetingsConsentUser()),
       colors: await getSetingsColorsUser(),
-      questions: Object.assign({}, await getSetingQuestionsUser()),
+      questions: await getSetingQuestionsUser(),
       contact: Object.assign({}, await getSetingsContactUser()),
     }
     log(__filename, 'Настройки пользователя');
-    table(setings);
+    table(await getSetingQuestionsUser());
     return setings;
   }
   //from, to, messageId, text, time, type, read
