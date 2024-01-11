@@ -8,14 +8,14 @@ const {
 
 class SetingsController {
   async get(){
-    // const toArr = (obj) => {
-    //   const arr = [];
-    //     for (var key in obj[0]) {
-    //       console.log(typeof obj[0][key], obj[0][key])
-    //       if (obj[0].hasOwnProperty(key) && key !== 'id') arr.push([key, obj[0][key]]);
-    //     }
-    //   return arr;
-    // }
+    const toArr = (obj) => {
+      const arr = [];
+        for (var key in obj[0]) {
+          console.log(typeof obj[0][key], obj[0][key])
+          if (obj[0].hasOwnProperty(key) && key !== 'id') arr.push([key, obj[0][key]]);
+        }
+      return arr;
+    }
     // const setings = [
     //   ['socket', toArr(await getSetingsSocketUser())],
     //   ['consent', toArr(await getSetingsConsentUser())],
@@ -27,8 +27,8 @@ class SetingsController {
       socket: Object.assign({}, await getSetingsSocketUser()),
       consent: Object.assign({}, await getSetingsConsentUser()),
       colors: await getSetingsColorsUser(),
-      questions: Object.assign({}, await getSetingQuestionsUser()),
-      contact: Object.assign({}, await getSetingsContactUser()),
+      questions: await getSetingQuestionsUser(),
+      contact: await getSetingsContactUser(),
     }
     log(__filename, 'Настройки пользователя');
     table(setings);
