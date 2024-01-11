@@ -31,7 +31,7 @@ class SetingsController {
       contact: await getSetingsContactUser(),
     }
     log(__filename, 'Настройки пользователя');
-    table(setings);
+    table(await getSetingQuestionsUser());
     return setings;
   }
   //from, to, messageId, text, time, type, read
