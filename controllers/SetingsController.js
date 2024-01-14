@@ -3,7 +3,7 @@ const {
   getSetingsConsentUser,
   getSetingsColorsUser,
   getSetingQuestionsUser,
-  getSetingsContactUser,
+  getSetingsContactsUser,
  } = require('../services/dataBase');
 
 class SetingsController {
@@ -28,7 +28,7 @@ class SetingsController {
       consent: Object.assign({}, await getSetingsConsentUser()),
       colors: await getSetingsColorsUser(),
       questions: await getSetingQuestionsUser(),
-      contact: await getSetingsContactUser(),
+      contacts: await getSetingsContactsUser(),
     }
     log(__filename, 'Настройки пользователя');
     table(await getSetingQuestionsUser());
