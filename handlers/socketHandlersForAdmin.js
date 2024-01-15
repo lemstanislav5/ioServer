@@ -37,7 +37,6 @@ module.exports = {
       log(__filename, 'Событие getUsers', users.length);
       callback(users);
     });
-
     socket.on('getMesseges', async (callback) => {
       const messeges = await MessegesController.get();
       log(__filename, 'Событие getMesseges', messeges.length);
@@ -83,9 +82,14 @@ module.exports = {
       log(__filename, 'disconnect', socket.id);
     });
     socket.on('getSetings', async callback => {
-      log(__filename, 'getSetings');
+      log(__filename, 'Событие getSetings');
       let setings = await SetingsController.get();
       return callback(setings);
+    });
+    socket.on('setSetings', async ({data}, callback) => {
+      const setings = await SetingsController.set(data);
+      log(__filename, 'Событие Set setings');
+      callback(setings);
     });
   }
 }
