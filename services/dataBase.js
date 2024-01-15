@@ -30,8 +30,8 @@ module.exports = {
             query('data.db3', 'run', "CREATE TABLE if not exists `setingsSocketUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT, `ws` TEXT, `port` TEXT)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `setingsConsentUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `consentLink` TEXT, `policyLink` TEXT)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `setingsColorsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `conteiner` TEXT, `top` TEXT, `messeges` TEXT, `fromId` TEXT, `text` TEXT, `notification` TEXT, `toId` TEXT)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `setingsQuestionsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `question` TEXT, OffOn INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `setingsContactsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `SocialNetwork` TEXT, `Link` TEXT)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `setingsQuestionsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `question` TEXT, offOn INTEGER)"),
+            query('data.db3', 'run', "CREATE TABLE if not exists `setingsContactsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `socialNetwork` TEXT, `Link` TEXT, `offOn` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `email` TEXT, `online` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `messeges` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `fromId` TEXT, `toId` TEXT, `messageId` TEXT, `text` TEXT, `time` INTEGER, `type` TEXT, `read` INTEGER)"),
             query('data.db3', 'run', "CREATE TABLE if not exists `admin` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT, `socketId` TEXT, `login` TEXT, `password` TEXT)")
@@ -40,9 +40,9 @@ module.exports = {
         .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsSocketUser (id, url, ws, port) values ("1", "localhost", "ws", "4000")', []))
         .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsConsentUser (id, consentLink, policyLink) values ("1", "", "")', []))
         .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsColorsUser (id, conteiner, top, messeges, fromId, text, notification, toId) values ("1", "#fff", "#2c2e33", "#000", "#303245", "#FFB700", "#333", "#5e785e")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsQuestionsUser (id, question, OffOn) values ("1", "Здравствуйте!", "1")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsQuestionsUser (id, question, OffOn) values ("2", "--------", "1")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsContactsUser (id, SocialNetwork, Link) values ("1", "Telegram", "https://Telegram.com")', []))
+        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsQuestionsUser (id, question, offOn) values ("1", "Здравствуйте!", "1")', []))
+        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsQuestionsUser (id, question, offOn) values ("2", "--------", "1")', []))
+        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsContactsUser (id, socialNetwork, link, offOn) values ("1", "Telegram", "https://Telegram.com", "1")', []))
     },
     //-----------------------------------setings-----------------------------------
     getSetingsSocketUser: () => (query('data.db3', 'all', 'SELECT * FROM setingsSocketUser', [])),
