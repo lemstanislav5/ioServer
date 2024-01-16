@@ -4,6 +4,13 @@ const {
   getSetingsColorsUser,
   getSetingQuestionsUser,
   getSetingsContactsUser,
+  setSetingsColorsUser,
+  setSetingsSocketUser,
+  setSetingsConsentUser,
+  setSetingQuestionsUser,
+  delSetingQuestionsUser,
+  delSetingContactsUser,
+  setSetingContactsUser,
  } = require('../services/dataBase');
 
 class SetingsController {
@@ -27,10 +34,21 @@ class SetingsController {
     return setings;
   }
   async set(data){
-    log(__filename, 'Новые настройки сохранены в базе');
+    const {colors, socket, consent, questions} = data;
+    if (socket !== false) await setSetingsSocketUser(socket);
+    if (consent !== false) await setSetingsConsentUser(consent);
+    if (colors !== false) await setSetingsColorsUser(colors);
+    if (questions !== false) {
+      await delSetingQuestionsUser();
+      questions.forEach(async item => await setSetingQuestionsUser(item));
+    }
+    if (contacts !== false) {
+      await delSetingContactsUser();
+      contacts.forEach(async item => await setSetingContactsUser(item));
+    }
     //colors: colorsVal, socket: socketVal, consent: consentVal, questions: questionsVal, contacts: contactsVal
-    table(data.colors);
-    table(data.socket);
+    log(__filename, 'set', colors);
+    table(socket);
   }
 }
 

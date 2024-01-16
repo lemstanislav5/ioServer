@@ -18,7 +18,6 @@ module.exports = {
         if (err) return next(new Error('Authentication error'));
         socket.authentication = true;
         socket.decoded = decoded;
-        console.log('Верификация токена, переданного через сокет пройдена успешно!: ', decoded);
         next();
       });
     } else if (socket.handshake.query && socket.handshake.query.token === undefined){
@@ -29,34 +28,27 @@ module.exports = {
     }
   },
   connection: async (socket) => {
-    log(__filename, 'М Е Н Е Д Ж Е Р   П О Д К Л Ю Ч И Л С Я, socketId: ', socket.id);
     await ManagerController.updateSocketId(socket.id);
 
     socket.on('getUsers', async (callback) => {
       const users = await UsersController.get();
-      log(__filename, 'Событие getUsers', users.length);
       callback(users);
     });
     socket.on('getMesseges', async (callback) => {
       const messeges = await MessegesController.get();
-      log(__filename, 'Событие getMesseges', messeges.length);
       callback(messeges);
     });
     socket.on('read', async ({currentUser}, callback) => {
       const read = await MessegesController.read(currentUser);
-      log(__filename, 'Событие read', currentUser);
       callback(currentUser);
     });
 
     socket.on('newMessage', async ({toId, text, time, type}, callback) => {
       const fromId = 'admin', messegeId = uuidv4();
-      log(__filename, 'Новое сообщение менеджера', {toId, text, time, type});
       await MessegesController.add(fromId, toId, messegeId, text, time, type);
       let message = await MessegesController.find(messegeId);
       const socketId = await UsersController.getUserSocketId(toId);
       io.to(socketId).emit('newMessage', message[0]);
-      log(__filename, 'Сообщение направлено пользователю');
-      table(message);
       return callback(message[0]);
     });
 
@@ -73,8 +65,6 @@ module.exports = {
         const socketId = await UsersController.getUserSocketId(toId);
         if (err) return callback(false);
         io.to(socketId).emit('newMessage', message[0]);
-        log(__filename, 'Файл направлен пользователю');
-        table(message);
         return callback(message[0]);
       })
     });
@@ -82,14 +72,12 @@ module.exports = {
       log(__filename, 'disconnect', socket.id);
     });
     socket.on('getSetings', async callback => {
-      log(__filename, 'Событие getSetings');
       let setings = await SetingsController.get();
       return callback(setings);
     });
     socket.on('setSetings', async ({data}, callback) => {
-      const setings = await SetingsController.set(data);
-      log(__filename, 'Событие Set setings');
-      callback(setings);
+      await SetingsController.set(data);
+      callback(true);
     });
   }
 }

@@ -6,6 +6,7 @@ const fs = require("fs"),
       MessegesController = require("../controllers/MessegesController"),
       UsersController = require('../controllers/UsersController'),
       ManagerController = require('../controllers/AdminController'),
+      SetingsController = require('../controllers/SetingsController'),
       { table } = require("console");
 
 module.exports = {
@@ -86,6 +87,11 @@ module.exports = {
       } else {
         log(__filename, 'Пользователь отсоединился', 'сокет в базе не найден, статус не изменен!!!');
       }
+    });
+
+    socket.on('getSetings', async callback => {
+      let setings = await SetingsController.get();
+      return callback(setings);
     });
   }
 }
