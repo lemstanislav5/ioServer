@@ -22,10 +22,13 @@ class SetingsController {
         }
       return arr;
     }
+    const colors = await getSetingsColorsUser();
+    const socket = await getSetingsSocketUser();
+    const consent = await getSetingsConsentUser();
     const setings = {
-      socket: Object.assign({}, await getSetingsSocketUser()),
-      consent: Object.assign({}, await getSetingsConsentUser()),
-      colors: await getSetingsColorsUser(),
+      socket: socket[0],
+      consent: consent[0],
+      colors: colors[0],
       questions: await getSetingQuestionsUser(),
       contacts: await getSetingsContactsUser(),
     }
@@ -34,7 +37,7 @@ class SetingsController {
     return setings;
   }
   async set(data){
-    const {colors, socket, consent, questions} = data;
+    const {colors, socket, consent, questions, contacts} = data;
     if (socket !== false) await setSetingsSocketUser(socket);
     if (consent !== false) await setSetingsConsentUser(consent);
     if (colors !== false) await setSetingsColorsUser(colors);
@@ -47,8 +50,8 @@ class SetingsController {
       contacts.forEach(async item => await setSetingContactsUser(item));
     }
     //colors: colorsVal, socket: socketVal, consent: consentVal, questions: questionsVal, contacts: contactsVal
-    log(__filename, 'set', colors);
-    table(socket);
+    // log(__filename, 'set', colors);
+    // table(socket);
   }
 }
 
