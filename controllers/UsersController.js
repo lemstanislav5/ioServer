@@ -65,6 +65,13 @@ class UsersController {
     await userOffline(chatId);
     log(__filename, 'Пользователь offline', chatId);
   }
+  async allUsersOffline(){
+    let users = await getUsers();
+    log(__filename, 'Получены данные пользователей', users);
+    users.forEach(async user => {
+      await userOffline(user.chatId);
+    });
+  }
 }
 
 module.exports = new UsersController();

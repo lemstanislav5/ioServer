@@ -22,7 +22,11 @@ const express = require("express"),
   routes = require("./routes"),
   HOST = process.env.HOST,
   PORT = process.env.PORT,
-  SOCKET_PORT = process.env.SOCKET_PORT;
+  SOCKET_PORT = process.env.SOCKET_PORT,
+  UsersController = require('./controllers/UsersController');
+
+//При любой перезагрузке сервера все пользователи, занесенные в базу становятся offLine
+UsersController.allUsersOffline();  
 
 (http = require("http").Server(app)),
   // socket----------------------------------------

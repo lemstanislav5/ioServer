@@ -1,7 +1,6 @@
 const fs = require("fs"),
       Utilities = require('../utilities/utilities'),
       process = require('process'),
-      {userOnline} = require("../services/dataBase"),
       {v4: uuidv4} = require('uuid'),
       MessegesController = require("../controllers/MessegesController"),
       UsersController = require('../controllers/UsersController'),
