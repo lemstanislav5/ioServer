@@ -67,10 +67,11 @@ class UsersController {
   }
   async allUsersOffline(){
     let users = await getUsers();
-    log(__filename, 'Получены данные пользователей', users);
+    
     users.forEach(async user => {
       await userOffline(user.chatId);
     });
+    log(__filename, 'Все пользователи, занесенные в базу становятся offLineй');
   }
 }
 
