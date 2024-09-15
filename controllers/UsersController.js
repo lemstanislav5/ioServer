@@ -47,6 +47,7 @@ class UsersController {
     return (user.length > 0 && user[0].socketId !== socket.id) ? false: true;
   }
   async getUserSocketId(chatId) {
+    log(__filename, 'getUserSocketId(chatId)', chatId);
     const user = await findUser(chatId);
     log(__filename, 'Получен socket.id пользователя', user[0].socketId);
     return user[0].socketId;
