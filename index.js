@@ -12,7 +12,7 @@ global.log = (filename, text, data) => {
 global.table = (data) => console.table(data);
 
 require("dotenv").config();
-// создаем базу данных и добавляем пользователя с паролем и логином - admin
+// создаем базу данных и добавляем пользователя с паролем и логином - "1"
 require("./services/dataBase").init('1', '1')
 const express = require("express"),
   app = express(),

@@ -1,5 +1,5 @@
 const {
-  getMesseges,
+  getMessages,
   addMessage,
   read,
   findMessege,
@@ -7,7 +7,7 @@ const {
 
 class MessegesController {
   async get(){
-    const messeges = await getMesseges();
+    const messeges = await getMessages();
     log(__filename, 'Получены сообщения пользователей');
     table(messeges);
     return messeges;

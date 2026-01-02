@@ -1,6 +1,8 @@
 /**
  * Основной принцип - избежать создания лишних сущностей (таблиц, объектов)
  * ?Нужно расмотреть вопрос о необходимости добавления в таблицу "users" полей phone и  email, либо создания отдельной таблицы?
+ * ! При настройке портов в Ngin необходимо убрать строчку process.env.PORT из handlers_socketHandlersForUsers.js
+ * ! Пользователь не видет прочитано или нет сообщение администратором, только добавление в базу и отправку менеджеру handlers_socketHandlersForUsers.js
 */
 const sqlite3 = require('sqlite3').verbose();
 const query = (file, req, sql, params = []) => {
@@ -24,26 +26,144 @@ const query = (file, req, sql, params = []) => {
 }
 
 module.exports = {
+     /**
+     * Инициализация базы данных и создание необходимых индексов
+     */
     init: () => {
         return Promise.all([
-            //`conteiner: '#fff', top: '#2c2e33', messeges: '#000', from: '#303245', text: '#FFB700', notification: '#333', to: '#5e785e',
-            query('data.db3', 'run', "CREATE TABLE if not exists `setingsSocketUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT, `ws` TEXT, `port` TEXT)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `setingsConsentUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `consentLink` TEXT, `policyLink` TEXT)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `setingsColorsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `conteiner` TEXT, `top` TEXT, `messeges` TEXT, `fromId` TEXT, `text` TEXT, `notification` TEXT, `toId` TEXT)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `setingsQuestionsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `question` TEXT, offOn INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `setingsContactsUser` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `socialNetwork` TEXT, `link` TEXT, `offOn` INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `chatId` TEXT, `socketId` TEXT, `name` TEXT, `email` TEXT, `online` INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `messeges` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `fromId` TEXT, `toId` TEXT, `messageId` TEXT, `text` TEXT, `time` INTEGER, `type` TEXT, `read` INTEGER)"),
-            query('data.db3', 'run', "CREATE TABLE if not exists `admin` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `chatId` TEXT, `socketId` TEXT, `login` TEXT, `password` TEXT)")
+            // Создание основных таблиц
+            query('data.db3', 'run', `
+                CREATE TABLE IF NOT EXISTS setingsSocketUser (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    url TEXT,
+                    ws TEXT,
+                    port TEXT
+                )`),
+            
+            query('data.db3', 'run', `
+                CREATE TABLE IF NOT EXISTS setingsConsentUser (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    consentLink TEXT,
+                    policyLink TEXT
+                )`),
+            
+            query('data.db3', 'run', `
+                CREATE TABLE IF NOT EXISTS setingsColorsUser (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    conteiner TEXT,
+                    top TEXT,
+                    messages TEXT,
+                    fromId TEXT,
+                    text TEXT,
+                    notification TEXT,
+                    toId TEXT
+                )`),
+            
+            query('data.db3', 'run', `
+                CREATE TABLE IF NOT EXISTS setingsQuestionsUser (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    question TEXT,
+                    offOn INTEGER
+                )`),
+            
+            query('data.db3', 'run', `
+                CREATE TABLE IF NOT EXISTS setingsContactsUser (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    socialNetwork TEXT,
+                    link TEXT,
+                    offOn INTEGER
+                )`),
+            
+            // ОБНОВЛЕНО: добавлены поля phone и role
+            query('data.db3', 'run', `
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    chatId TEXT NOT NULL,
+                    socketId TEXT,
+                    name TEXT,
+                    email TEXT,
+                    phone TEXT,
+                    role TEXT CHECK(role IN ('user', 'admin')) DEFAULT 'user',
+                    online INTEGER DEFAULT 0,
+                    created_at INTEGER DEFAULT (strftime('%s', 'now'))
+                )`),
+            
+            // ОБНОВЛЕНО: исправлено название таблицы messages
+            query('data.db3', 'run', `
+                CREATE TABLE IF NOT EXISTS messages (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    fromId TEXT NOT NULL,
+                    toId TEXT NOT NULL,
+                    messageId TEXT UNIQUE,
+                    text TEXT NOT NULL,
+                    time INTEGER NOT NULL,
+                    type TEXT DEFAULT 'text',
+                    is_read INTEGER DEFAULT 0
+                )`),
+            
+            query('data.db3', 'run', `
+                CREATE TABLE IF NOT EXISTS admin (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    chatId TEXT UNIQUE NOT NULL,
+                    socketId TEXT,
+                    login TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL
+                )`)
         ])
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO admin (id, chatId, login, password) values ("1", "admin", "1","1")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsSocketUser (id, url, ws, port) values ("1", "localhost", "ws", "4000")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsConsentUser (id, consentLink, policyLink) values ("1", "", "")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsColorsUser (id, conteiner, top, messeges, fromId, text, notification, toId) values ("1", "#fff", "#fff", "#303245", "#2a306b", "#5f3288", "#333", "#5e785e")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsQuestionsUser (id, question, offOn) values ("1", "Здравствуйте!", "1")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsContactsUser (id, socialNetwork, link, offOn) values ("1", "Telegram", "https://Telegram.com", "1")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsContactsUser (id, socialNetwork, link, offOn) values ("2", "VKontakte", "https://VKontakte.com", "1")', []))
-        .then(() => query('data.db3', 'all', 'INSERT OR REPLACE INTO setingsContactsUser (id, socialNetwork, link, offOn) values ("3", "WhatsApp", "https://WhatsApp.com", "1")', []))
+        // Создание индексов для оптимизации запросов
+        .then(() => Promise.all([
+            // Индексы для таблицы users
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_users_chatId ON users(chatId)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_users_socketId ON users(socketId)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_users_online ON users(online)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_users_created ON users(created_at)'),
+            
+            // Индексы для таблицы messages (наиболее важные для производительности)
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_messages_fromId ON messages(fromId)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_messages_toId ON messages(toId)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_messages_messageId ON messages(messageId)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_messages_time ON messages(time)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_messages_is_read ON messages(is_read)'),
+            // Составной индекс для быстрого поиска диалогов
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_messages_dialog ON messages(fromId, toId, time)'),
+            // Составной индекс для поиска непрочитанных сообщений
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_messages_unread ON messages(toId, is_read) WHERE is_read = 0'),
+            
+            // Индексы для таблицы admin
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_admin_chatId ON admin(chatId)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_admin_login ON admin(login)'),
+            
+            // Индексы для таблиц настроек
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_questions_offOn ON setingsQuestionsUser(offOn)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_contacts_offOn ON setingsContactsUser(offOn)'),
+            query('data.db3', 'run', 'CREATE INDEX IF NOT EXISTS idx_contacts_network ON setingsContactsUser(socialNetwork)')
+        ]))
+        // Заполнение начальными данными
+        .then(() => query('data.db3', 'run', 
+            'INSERT OR REPLACE INTO admin (id, chatId, login, password) VALUES (?, ?, ?, ?)', 
+            [1, 'admin', '1', '1']))
+        .then(() => query('data.db3', 'run',
+            'INSERT OR REPLACE INTO setingsSocketUser (id, url, ws, port) VALUES (?, ?, ?, ?)',
+            [1, 'localhost', 'ws', '4000']))
+        .then(() => query('data.db3', 'run',
+            'INSERT OR REPLACE INTO setingsConsentUser (id, consentLink, policyLink) VALUES (?, ?, ?)',
+            [1, '', '']))
+        .then(() => query('data.db3', 'run',
+            'INSERT OR REPLACE INTO setingsColorsUser (id, conteiner, top, messages, fromId, text, notification, toId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [1, '#fff', '#fff', '#303245', '#2a306b', '#5f3288', '#333', '#5e785e']))
+        .then(() => query('data.db3', 'run',
+            'INSERT OR REPLACE INTO setingsQuestionsUser (id, question, offOn) VALUES (?, ?, ?)',
+            [1, 'Здравствуйте!', 1]))
+        .then(() => query('data.db3', 'run',
+            'INSERT OR REPLACE INTO setingsContactsUser (id, socialNetwork, link, offOn) VALUES (?, ?, ?, ?)',
+            [1, 'Telegram', 'https://Telegram.com', 1]))
+        .then(() => query('data.db3', 'run',
+            'INSERT OR REPLACE INTO setingsContactsUser (id, socialNetwork, link, offOn) VALUES (?, ?, ?, ?)',
+            [2, 'VKontakte', 'https://VKontakte.com', 1]))
+        .then(() => query('data.db3', 'run',
+            'INSERT OR REPLACE INTO setingsContactsUser (id, socialNetwork, link, offOn) VALUES (?, ?, ?, ?)',
+            [3, 'WhatsApp', 'https://WhatsApp.com', 1]));
     },
     //-----------------------------------setings-----------------------------------
     getSetingsSocketUser: () => (query('data.db3', 'all', 'SELECT * FROM setingsSocketUser', [])),
@@ -54,7 +174,7 @@ module.exports = {
 
     setSetingsSocketUser: (data) => (query('data.db3', 'run', 'UPDATE setingsSocketUser SET url=?, ws=?, port=? WHERE id=1', [data.url, data.ws, data.port])),
     setSetingsConsentUser: (consent) => (query('data.db3', 'run', 'UPDATE setingsConsentUser SET policyLink=?, consentLink=? WHERE id=1', [consent.policyLink, consent.consentLink])),
-    setSetingsColorsUser: (colors) => (query('data.db3', 'run', 'UPDATE setingsColorsUser SET conteiner=?, top=?, messeges=?, fromId=?, text=?, notification=?, toId=? WHERE id=1', [colors.conteiner, colors.top, colors.messeges, colors.fromId, colors.text, colors.notification, colors.toId])),
+    setSetingsColorsUser: (colors) => (query('data.db3', 'run', 'UPDATE setingsColorsUser SET conteiner=?, top=?, messages=?, fromId=?, text=?, notification=?, toId=? WHERE id=1', [colors.conteiner, colors.top, colors.messages, colors.fromId, colors.text, colors.notification, colors.toId])),
     delSetingQuestionsUser: () => (query('data.db3', 'run', 'DELETE FROM setingsQuestionsUser', [])),
     setSetingQuestionsUser: (data) => (query('data.db3', 'run', 'INSERT OR REPLACE INTO setingsQuestionsUser (id, question, offOn) values ("'+ data.id + '", "'+ data.question + '", "'+ data.offOn + '")', [])),
     delSetingContactsUser: () => (query('data.db3', 'run', 'DELETE FROM setingsContactsUser', [])),
@@ -68,13 +188,13 @@ module.exports = {
     userOnline: (chatId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE chatId=?', [1, chatId])),
     userOffline: (chatId) => (query('data.db3', 'run', 'UPDATE users SET online=? WHERE chatId=?', [0, chatId])),
     findUserBySocketId: (socketId) => (query('data.db3', 'all', 'SELECT * FROM users WHERE socketId = "' + socketId + '"', [])),
-    //-----------------------------------messeges-----------------------------------
-    //from, to, socketId, messageId, text, time, type, read
-    addMessage: (fromId, toId, messageId, text, time, type, read) => (query('data.db3', 'run', 'INSERT INTO messeges (fromId, toId, messageId, text, time, type, read) values ("' +
-      fromId + '","' + toId + '","' + messageId + '","' + text + '","' + time + '","' + type + '","' + read + '")', [])),
-    findMessege: messageId => (query('data.db3', 'all', 'SELECT * FROM messeges WHERE messageId=?', [messageId])),
-    getMesseges: () => (query('data.db3', 'all', 'SELECT * FROM messeges', [])),
-    read: (chatId) => (query('data.db3', 'run', 'UPDATE messeges SET read=? WHERE fromId=? OR toId=?', [1, chatId])),
+    //-----------------------------------messages-----------------------------------
+    //from, to, socketId, messageId, text, time, type, is_read
+    addMessage: (fromId, toId, messageId, text, time, type, is_read) => (query('data.db3', 'run', 'INSERT INTO messages (fromId, toId, messageId, text, time, type, is_read) values ("' +
+      fromId + '","' + toId + '","' + messageId + '","' + text + '","' + time + '","' + type + '","' + is_read + '")', [])),
+    findMessege: messageId => (query('data.db3', 'all', 'SELECT * FROM messages WHERE messageId=?', [messageId])),
+    getMessages: () => (query('data.db3', 'all', 'SELECT * FROM messages', [])),
+    read: (chatId) => (query('data.db3', 'run', 'UPDATE messages SET is_read=? WHERE fromId=? OR toId=?', [1, chatId])),
     //-----------------------------------admin-----------------------------------
     getAdmin: () => (query('data.db3', 'all', 'SELECT * FROM admin', [])),
     updateAdminSocketId: (socketId) => (query('data.db3', 'all', 'UPDATE admin SET socketId=? WHERE id=1', [socketId])),
